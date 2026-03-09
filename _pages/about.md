@@ -48,8 +48,8 @@ I am always on the lookout for excellent visiting/PhD students to work with me o
 
 # Professional Service
   - Organiser
-    - PreTrain 2025: Spotlight on ACL/ICML/ICLR at KCL
-    - Co-Chair of the AACL22-Student Research Workshop
+    - MathNLP
+    - SemEval 2026 Task 11
   - Senior Area Chair:
     - EMNLP 25
     - EACL 26
