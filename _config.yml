@@ -22,7 +22,7 @@ baidu_site_verification  :  # get baidu_site_verification from https://ziyuan.ba
 author:
   name             : "Leonardo Ranaldi"
   avatar           : "images/img.jpeg"
-  #bio              : ""
+  bio              : " "
   location         : "Edinburgh, UK"
   employer         :
   pubmed           : 
