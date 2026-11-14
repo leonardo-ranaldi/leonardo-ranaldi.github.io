@@ -24,6 +24,13 @@
     el("text", { class: "a-title", x: x + 14, y: y + 23 }, svg, title);
     return r;
   }
+  function taskBar(svg) {
+    el("rect", { class: "a-task", x: 12, y: -2, width: 936, height: 32, rx: 8 }, svg);
+    el("text", { class: "a-title", x: 26, y: 18 }, svg, "Task");
+    var t = el("text", { class: "a-tasktext", x: 70, y: 18 }, svg, "");
+    var n = el("text", { class: "a-sub", x: 934, y: 18, "text-anchor": "end" }, svg, "");
+    return function (text, num) { t.textContent = text || ""; n.textContent = num || ""; };
+  }
   function chip(svg, x, y, w, label, extra) {
     var g = el("g", { class: "a-chip" + (extra ? " " + extra : "") }, svg);
     el("rect", { x: x, y: y, width: w, height: 18, rx: 4 }, g);
@@ -46,7 +53,8 @@
      Follows Sections 2.1 to 2.3 of the EVA paper and its WebShop example.
      ------------------------------------------------------------------ */
   function buildEva(svg) {
-    var pTraj = panel(svg, 12, 40, 236, 190, "Trajectory");
+    var setTask = taskBar(svg);
+    var pTraj = panel(svg, 12, 40, 236, 190, "Actions and feedback");
     var pAbs = panel(svg, 364, 40, 300, 190, "Active abstraction");
     var pMem = panel(svg, 676, 40, 272, 190, "Memory");
     var conf = el("text", { class: "a-sub", x: 650, y: 63, "text-anchor": "end" }, svg, "");
@@ -73,6 +81,12 @@
       o.tag = el("text", { class: "a-tag", x: 702, y: y + 33 }, g, "");
       el("rect", { class: "a-track", x: 852, y: y + 26, width: 70, height: 7, rx: 3 }, g);
       o.util = el("rect", { class: "a-meter", x: 852, y: y + 26, width: 0, height: 7, rx: 3 }, g);
+      o.fs = ["V", "T", "C", "E"].map(function (k, n) {
+        var c = el("g", { class: "a-fchip" }, g);
+        el("rect", { x: 768 + n * 17, y: y + 23, width: 14, height: 12, rx: 3 }, c);
+        el("text", { x: 775 + n * 17, y: y + 32, "text-anchor": "middle" }, c, k);
+        return { g: c, k: k };
+      });
       return o;
     });
 
@@ -82,7 +96,8 @@
       modName.textContent = f.mod || ""; cls(mod, "on", !!f.mod);
       for (var k in chips) cls(chips[k], "on", f.meta === k);
       a1.on(has(f, "a1")); a2.on(has(f, "a2")); aBack.on(has(f, "back")); a3.on(has(f, "a3")); aRet.on(has(f, "ret"));
-      goal.textContent = f.goal || "";
+      var tk = TASKS[f.goal] || [];
+      if (tk[0]) setTask(tk[0], tk[1]); goal.textContent = "environment: WebShop";
       steps.forEach(function (t, i) { setVal(t, (f.steps || [])[i]); });
       setVal(res, f.res);
       conf.textContent = f.conf ? "confidence " + f.conf : "";
@@ -91,7 +106,8 @@
         var e = (f.mem || [])[i];
         cls(o.g, "a-hide", !e); if (!e) return;
         o.title.textContent = e.title; o.tag.textContent = e.tag;
-        cls(o.tag, "bad", e.tag === "FAILURE"); cls(o.box, "best", !!e.hi); cls(o.g, "dim", !!e.fade);
+        cls(o.tag, "bad", e.tag === "FAILURE"); cls(o.box, "best", !!e.hi); cls(o.g, "dim", !!e.fade); cls(o.g, "fly", !!e.hi);
+        o.fs.forEach(function (c) { cls(c.g, "a-hide", (e.fields || "VTCE").indexOf(c.k) < 0); cls(c.g, "amber", e.tag === "FAILURE"); });
         o.util.setAttribute("width", 70 * e.util); cls(o.util, "low", e.util < 0.3);
       });
     };
@@ -100,8 +116,12 @@
 
   var OLD = { title: "navigation shortcut", tag: "SUCCESS", util: 0.22 };
   var PROC = { title: "product selection procedure", tag: "SUCCESS", util: 0.5 };
-  var AVOID = { title: "option required before purchase", tag: "FAILURE", util: 0.4 };
+  var AVOID = { title: "option required before purchase", tag: "FAILURE", util: 0.4, fields: "C" };
+  var TASKS = {};
   var G1 = "goal: find grocery cookies", G2 = "goal: find grocery crackers", G3 = "goal: find a mug, colour blue";
+  TASKS[G1] = ["\u201cI need grocery cookies. Find a product that matches and buy it.\u201d", "task 1 of 3"];
+  TASKS[G2] = ["\u201cI need grocery crackers. Find a product that matches and buy it.\u201d", "task 2 of 3"];
+  TASKS[G3] = ["\u201cI need a mug in blue. Find it, select the colour and buy it.\u201d", "task 3 of 3"];
   var A_FULL = { V: "product, category, price, options", T: "search, inspect, open page, verify, buy", C: "buy only when every requirement is checked", E: "progress 3 of 4, no contradiction" };
   var EVA = [
     { cap: "A task arrives. The agent searches the shop and opens a candidate product. At this stage the experience is a raw trajectory of observations, actions and feedback.",
@@ -150,6 +170,7 @@
      world-model correction, model trust).
      ------------------------------------------------------------------ */
   function buildWeva(svg) {
+    taskBar(svg)("\u201cBook me a flight from Rome to Edinburgh. My return flight is already booked.\u201d", "flight booking");
     var pState = panel(svg, 12, 40, 236, 190, "Current state σ");
     var pFut = panel(svg, 362, 40, 370, 190, "Verified lookahead");
     var pEnv = panel(svg, 744, 40, 204, 190, "Environment");
@@ -254,7 +275,7 @@
   function mount(host, key, autoplay) {
     var sc = SCENES[key];
     var wrap = document.createElement("div"); host.appendChild(wrap);
-    var svg = el("svg", { viewBox: "0 30 960 212", role: "img", "aria-label": sc.label }, null);
+    var svg = el("svg", { viewBox: "0 -8 960 250", role: "img", "aria-label": sc.label }, null);
     wrap.appendChild(svg);
     var render = sc.build(svg);
     var cap = document.createElement("p"); cap.className = "anim__cap"; cap.setAttribute("aria-live", "polite"); wrap.appendChild(cap);
@@ -279,7 +300,7 @@
       dotEls.forEach(function (d, k) { d.classList.toggle("on", k === idx); });
     }
     function tick() { show(idx + 1); schedule(); }
-    function schedule() { clearTimeout(timer); if (playing && visible) timer = setTimeout(tick, idx === sc.frames.length - 1 ? 5200 : 3400); }
+    function schedule() { clearTimeout(timer); if (playing && visible) timer = setTimeout(tick, idx === sc.frames.length - 1 ? 3600 : 2300); }
     function start() { playing = true; play.textContent = "Pause"; schedule(); }
     function stop() { playing = false; play.textContent = "Play"; clearTimeout(timer); }
     prev.addEventListener("click", function () { stop(); show(idx - 1); });
