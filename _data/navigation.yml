@@ -5,20 +5,5 @@ main:
   - title: "Research"
     url: "/#research"
 
-  - title: "Experience"
-    url: "/#experience"
-
-  - title: "Funding"
-    url: "/#funding"
-
-  - title: "Publications"
-    url: "/#publications"
-
-  - title: "Teaching"
-    url: "/#teaching"
-
-  - title: "Service"
-    url: "/#service"
-
   - title: "Blog"
     url: "/blog/"
