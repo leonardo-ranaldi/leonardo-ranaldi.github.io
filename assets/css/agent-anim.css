@@ -115,3 +115,13 @@ html.dark .anim__tab.on { color: var(--bg); }
 .anim .a-mark { font-size: 10.5px; font-weight: 600; fill: var(--muted); }
 .anim .a-val.ok { fill: var(--pass); font-weight: 600; }
 .anim .a-val { font-size: 11px; }
+
+/* task bar, memory field chips and fly-in */
+.anim .a-task { fill: var(--keep-wash); stroke: var(--keep); stroke-width: 1.2; }
+.anim .a-tasktext { fill: var(--ink); font-size: 12.5px; font-style: italic; }
+.anim .a-fchip rect { fill: var(--keep); opacity: .85; }
+.anim .a-fchip.amber rect { fill: var(--fail); }
+.anim .a-fchip text { fill: var(--surface); font-size: 8.5px; font-weight: 700; }
+.anim .a-entry.fly { animation: a-fly .7s ease both; }
+@keyframes a-fly { from { transform: translateX(-300px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .anim .a-entry.fly { animation: none; } }
