@@ -13,7 +13,6 @@ redirect_from:
 # Leonardo Ranaldi
 
 I am a Research Fellow at the University of Edinburgh and Researcher at the University of Rome Tor Vergata.
-
 My research interests lie in NLP and AI, focusing on LLM reasoning, self-learning, memory-augmented systems, multimodal reasoning, neuro-symbolic methods, and controllable and aligned models. I study the extent to which generative models can learn from interaction, acquire and use structured reasoning capabilities, and adapt their behaviour across contexts and over time, with the aim of steering generative architectures beyond statistical shortcuts towards reliable and more controllable systems.
 
 I work in international contexts, collaborating with researchers across academia and industry. I am the PI of a Google for AI Research computing grant (Building Trustworthy AI), Co-PI of a Huawei–Edinburgh research grant (Adaptive Memory-Augmented Agentic Reasoning), and I have been WP Leader in the Horizon Europe project UTTER. I publish regularly in leading international AI and CL/NLP venues and journals, and I contribute to the research community as a Senior Area Chair for major conferences. I also organise international workshops, including ORACLE and MathNLP, tutorials on reasoning, neuro-symbolic modelling and agentic AI, and an international shared task on multilingual reasoning.
