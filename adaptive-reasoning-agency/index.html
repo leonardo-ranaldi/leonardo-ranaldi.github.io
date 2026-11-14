@@ -60,7 +60,7 @@
         <p class="hero__dek">The extent to which agents should adapt.</p>
         <p class="hero__by">Leonardo Ranaldi, University of Edinburgh and University of Rome Tor Vergata. Based on a talk given in September 2026.</p>
 
-        <p class="hero__lead">Language agents powered by LLMs can plan, use tools and complete tasks that would otherwise take hours of human work. Yet they remain brittle when past experience no longer reflects the situation they face. A chatbot that answers incorrectly can be asked again, while an agent may already have edited a file, called an API or changed a database. The question is how far past experience should guide future actions, and what evidence should prompt an agent to adapt.</p>
+        <p class="hero__lead">Language agents powered by LLMs can plan, use tools and complete tasks that would otherwise take hours of human work. Yet they remain brittle when past experience no longer reflects the situation they face. A chatbot that answers incorrectly can be asked again, while an agent may have already edited a file, called API, or changed a database. The question is how far past experience should guide future actions, and what evidence should prompt an agent to adapt.</p>
         <p class="hero__lead">This essay examines adaptation as a reasoning problem. An agent needs to recognise what should remain stable across contexts, revise its decisions when evidence changes, turn experience into reusable procedures, and anticipate failures before acting. Together, these capacities help explain when an agent should change its behaviour and when it should retain what already works.</p>
 
         <figure class="figure figure--hero">
@@ -101,8 +101,8 @@
 
       <!-- ============================ OPENING ============================ -->
       <section class="section" id="opening">
-        <h2 class="section__title">The flight is booked, the return is gone</h2>
-        <p>The request above is an ordinary one. The agent searches the available flights from Rome, selects one and completes the purchase, and the evaluation that accompanies most agent benchmarks confirms that the task was completed. The failure becomes visible only when the itinerary is inspected after the run, where a booking that should have remained unchanged has been replaced.</p>
+        <h2 class="section__title">The flight is booked and the return is gone</h2>
+        <p>The request above is an ordinary one. The agent searches for available flights from Rome, selects one, completes the purchase, and the evaluation that accompanies most agent benchmarks confirms the task was completed. The failure becomes visible only when the itinerary is inspected after the run, where a booking that should have remained unchanged has been replaced.</p>
         <p>Two distinct lessons are available from this episode. The first concerns the task and states which booking should have been made. The second concerns the procedure and states that, before changing any booking, the agent should establish which parts of the itinerary must be preserved. The first lesson repairs one run. The second changes how the agent works on later tasks, including tasks that share little surface with this one.</p>
         <p>Today a developer inspects the failure and adds the check by hand. The research question is whether the agent can learn to make that change itself, which requires deciding what the experience shows, which part of the procedure needs attention, and whether the revision holds on another task.</p>
       </section>
@@ -418,13 +418,12 @@
 
         <figure class="figure figure--wide">
           <div class="chart" id="chart-worldbench"></div>
-          <figcaption><b>Task success is insufficient when agents change the world.</b> Pass rate against constrained task success (%), which additionally requires that the rest of the workspace is left as it was. The difference ranges from 10.1 (Gemini-3.1-Pro, 59.3%→49.2%) to 13.1 (GPT-4o, 51.7%→38.6%). Adaptive agents need process-sensitive evaluation.</figcaption>
-        </figure>
+<figcaption><b>Task success does not guarantee workspace preservation.</b> WorldBench evaluates whether agents complete their tasks while leaving unrelated files unchanged. The gap between task completion and constrained task success reveals failures that ordinary task-level evaluation may overlook.</figcaption>        </figure>
 
         <aside class="open">
           <p class="open__label">Open question</p>
           <p class="open__q">Can adaptation become collective and accountable?</p>
-          <p>Three primitives are candidates, namely provenance (who wrote a procedure, and from what), dissent (a procedure for pressing private evidence) and cost (a price on an unfounded claim). The contribution we aim for is an attribution, in which each primitive is tested against the specific failure it repairs.</p>
+          <p>Three primitives are candidates, namely provenance (who wrote a procedure, and from what), dissent (a procedure for pressing private evidence) and cost (a price on an unfounded claim). Our contribution is an attribution, in which each primitive is tested against the specific failure it repairs.</p>
         </aside>
 
         <ul class="papers" data-papers="eva,dialectic,worldbench"></ul>
