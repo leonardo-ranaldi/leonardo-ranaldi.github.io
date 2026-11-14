@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evolving Agents | Leonardo Ranaldi</title>
+  <meta name="description" content="A technical post on EVA and WEVA: how language agents can turn experience into reusable procedures, and procedures into predictions that are checked before acting." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/adaptive-reasoning-agency/style.css" />
+  <link rel="stylesheet" href="/assets/css/agent-anim.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("ara-theme"); } catch (e) {}
+      if (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) t = "dark";
+      if (t === "dark") document.documentElement.classList.add("dark");
+    })();
+  </script>
+</head>
+<body>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="#top">Evolving Agents</a>
+      <nav class="topbar__nav" aria-label="Site">
+        <a href="#papers">Papers</a>
+        <a href="/blog/">Blog</a>
+        <a href="/">Leonardo Ranaldi</a>
+        <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark theme">
+          <span class="theme-btn__light">Dark theme</span><span class="theme-btn__dark">Light theme</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout" id="top">
+    <aside class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <nav>
+        <a class="toc__item" href="#problem">Problem statement</a>
+        <a class="toc__item" href="#eva">EVA: experience into procedures</a>
+        <a class="toc__item" href="#weva">WEVA: procedures into predictions</a>
+        <a class="toc__item" href="#results">What the experiments show</a>
+        <a class="toc__item toc__item--sub" href="#q1">The form of memory</a>
+        <a class="toc__item toc__item--sub" href="#q2">Predicting before acting</a>
+        <a class="toc__item toc__item--sub" href="#q3">Noticing change</a>
+        <a class="toc__item" href="#closing">Closing thoughts</a>
+        <a class="toc__item" href="#cases">Case studies</a>
+        <a class="toc__item" href="#papers">Papers and citation</a>
+      </nav>
+    </aside>
+
+    <main class="article">
+
+      <section class="hero">
+        <h1 class="hero__title">Evolving Agents</h1>
+        <p class="hero__dek">How agents turn experience into procedures, and procedures into predictions.</p>
+        <p class="hero__by">Leonardo Ranaldi, University of Edinburgh and University of Rome Tor Vergata. A technical post on EVA (ACL 2026) and WEVA (EMNLP 2026).</p>
+
+        <figure class="figure figure--hero">
+          <div class="anim" data-anim="both"></div>
+          <figcaption><b>Figure 1. EVA and WEVA share one representation.</b> EVA turns a trajectory into a quasi-symbolic abstraction, stores it after a verified success or an instructive failure, and retrieves it on later tasks. WEVA uses the same state to predict what a candidate action would cause, and prunes an action whose predicted consequence breaks a precondition before it reaches the environment.</figcaption>
+        </figure>
+
+        <p class="hero__lead">Language agents increasingly solve streams of related tasks in the same environment. A shopping agent searches the same catalogue, an assistant edits the same set of files, a travel agent books through the same sites. Each task leaves experience that could make the next one easier. In practice, agents keep little of it, and they repeat similar mistakes across tasks that share the same structure.</p>
+        <p class="hero__lead">A common approach is to store experience as text, in the form of trajectories, summaries or skill documents. Stored text, however, mixes the procedure with the details of the episode in which it was learned. When the next task looks different on the surface, it is hard to tell which part still applies, and hard to check whether it was followed.</p>
+        <p class="hero__lead">In this post we describe two frameworks that take a different route. Both keep experience in a quasi-symbolic form, where a state is organised around entities, transitions, constraints and outcomes, and the content of each field is written in natural language. <b>EVA</b> (Evolving Agents) uses this state to decide what to remember and how to reuse it. <b>WEVA</b> (World-Model Evolving Agents) uses the same state to predict what an action would cause.</p>
+        <p class="hero__lead">This sounds straightforward, but there is a catch. Remembering what happened helps only after the fact, since the agent learns from an error once the error has occurred, and some errors cannot be undone. <b>Our main finding is that the representation that makes experience reusable is also what makes it predictive and checkable.</b> A structured state lets EVA retrieve a procedure and adapt it to a new task. It also lets WEVA compare a predicted state with the observed one, field by field, and reject a consequence before experiencing it.</p>
+      </section>
+
+      <section class="glance" aria-label="Summary">
+        <h2 class="glance__title">At a glance</h2>
+        <ul class="glance__list">
+          <li><b>Experience needs a form.</b> A typed state of entities, transitions, constraints and outcomes can be compared, retrieved and reused across tasks.</li>
+          <li><b>Memory keeps successes and failures.</b> Successes supply reusable transitions, and localised failures supply constraints on what to avoid.</li>
+          <li><b>Prediction comes before action.</b> A learned world model rolls candidate actions forward, and predicted violations are pruned before execution.</li>
+          <li><b>Trust regulates prediction.</b> The agreement between predicted and observed states tells the agent when its expectations have become unreliable.</li>
+        </ul>
+      </section>
+
+      <!-- ============================ PROBLEM ============================ -->
+      <section class="section" id="problem">
+        <h2 class="section__title">Problem statement</h2>
+        <p>We consider an agent that solves tasks in an interactive environment, for example a web shop, a household simulator or a set of connected applications. At each step the agent observes the environment, takes an action and receives feedback. We want two things from such an agent. First, experience gathered on earlier tasks should make later tasks easier. Second, the agent should avoid actions whose consequences cannot be undone, such as overwriting a file or replacing a booking.</p>
+        <p>Both goals depend on how experience is represented. Natural-language traces are expressive, but they provide no fixed place where a stored claim can be compared with what happens next. Fully symbolic representations make that comparison explicit, at the cost of defining everything in advance. Quasi-symbolic abstractions settle on an intermediate form <span class="cite" data-paper="quasar"></span>. The roles are fixed and the content is induced from interaction.</p>
+
+        <figure class="figure">
+          <div class="qcard">
+            <div class="qcard__head">
+              <p class="label">Quasi-symbolic abstraction, A = (V, T, C, E)</p>
+              <p class="qcard__title">Booking a flight when the return is already booked</p>
+            </div>
+            <dl class="qcard__fields">
+              <div><dt>V, entities</dt><dd>Outbound flight options, return booking, payment page</dd></div>
+              <div><dt>T, transitions</dt><dd>Search flights, select one, pay</dd></div>
+              <div><dt>C, constraints</dt><dd>The return booking stays unchanged</dd></div>
+              <div><dt>E, outcomes</dt><dd>Outbound not booked yet. Progress 0 of 2.</dd></div>
+            </dl>
+          </div>
+          <figcaption><b>Figure 2. One state, four roles.</b> The four fields keep the same role in every environment. Two states can therefore be compared field by field, and a proposed action can be checked against the constraints.</figcaption>
+        </figure>
+      </section>
+
+      <!-- ============================ EVA ============================ -->
+      <section class="section" id="eva">
+        <h2 class="section__title">EVA: turning experience into procedures</h2>
+        <p>EVA organises the agent around three modules, the Perceptor, the Controller and the Actor. The three modules read and write the same quasi-symbolic abstraction, which also serves as the interface to memory <span class="cite" data-paper="eva"></span>. The first tab of Figure 1 follows one complete cycle.</p>
+
+        <h3 class="subhead">The Perceptor reads the trajectory</h3>
+        <p>Given the goal, the current observation and a recent window of actions and feedback, the Perceptor writes the active abstraction. It also reports how confident it is in what it has written, a signal that the Controller reads at the next step.</p>
+
+        <h3 class="subhead">The Controller decides how to proceed</h3>
+        <p>The Controller does not choose environment actions. It reads a compact summary of the abstraction, namely the confidence, the share of contradicted constraints, the novelty against memory and the progress made, and it selects one of four meta-actions.</p>
+        <div class="ops">
+          <div class="ops__item"><p class="ops__name">Act</p><p>proceed with the Actor under the current abstraction</p></div>
+          <div class="ops__item"><p class="ops__name">Abstract</p><p>rebuild the abstraction over a longer trajectory</p></div>
+          <div class="ops__item"><p class="ops__name">Retrieve</p><p>look for compatible experience in memory</p></div>
+          <div class="ops__item"><p class="ops__name">Rollback</p><p>restore the last consistent abstraction</p></div>
+        </div>
+        <p>A rollback restores the reasoning state. It does not undo actions already executed in the environment, and the Actor replans from the current observation.</p>
+
+        <h3 class="subhead">What enters memory, and what leaves it</h3>
+        <p>An abstraction is stored after a verified success or an instructive failure, together with a link to its trajectory and an outcome label. When a stored abstraction is retrieved, its roles are bound to the entities of the current task. Successful abstractions contribute reusable transitions. Failure-derived abstractions contribute constraints, and only when the failure can be traced to a specific action through environment feedback, a verifier or a rollback.</p>
+        <p>Memory is also selective over time. Each entry keeps a record of how often its reuse was followed by a success, discounted by how long ago that happened. Entries that have been reused often enough without helping are pruned.</p>
+
+        <h3 class="subhead">Two timescales of learning</h3>
+        <p>The Controller is calibrated before interaction and then held fixed, whilst the Perceptor and the Actor keep learning from the trajectories the agent produces. Keeping the Controller fixed avoids the instability of updating meta-control and behaviour at the same time. A frozen configuration, EVA-Doc, keeps all weights fixed and adapts only through the abstractions it builds, retrieves and consolidates.</p>
+      </section>
+
+      <!-- ============================ WEVA ============================ -->
+      <section class="section" id="weva">
+        <h2 class="section__title">WEVA: from remembering to predicting</h2>
+        <p>EVA improves which action the agent proposes. The consequence of that action, however, is observed only after execution. Over long horizons this becomes critical, since an error may surface only when the state in which it could have been prevented is no longer reachable. WEVA adds a world model, and the agent evaluates candidate actions against it before acting <span class="cite" data-paper="weva"></span>. The second tab of Figure 1 follows the procedure on the flight request.</p>
+
+        <h3 class="subhead">A state that can be predicted</h3>
+        <p>WEVA keeps the entities, preconditions and outcomes of the abstraction as its predictive state. A transition model learns to map a state and a candidate action to the state expected to follow. No annotation is required, since after every executed action the next observation shows what actually happened. The Perceptor is also rewarded when its states are easier to predict, which encourages it to keep the information that governs how the environment changes.</p>
+
+        <h3 class="subhead">Verified lookahead</h3>
+        <p>Before acting, the Actor proposes a few candidate actions and the world model rolls them forward, up to two steps in our experiments. Each predicted transition is checked against the active preconditions. A branch is discarded as soon as one of its predicted steps breaks a precondition, even when its first step looks harmless. Among the surviving branches, WEVA executes only the first action of the branch with the highest predicted progress. When no branch survives, the Actor falls back to its policy without lookahead.</p>
+
+        <h3 class="subhead">Model trust</h3>
+        <p>Lookahead is useful only as long as the world model still describes the environment. WEVA measures the agreement between predicted and observed states over a window of executed steps, and we call this signal model trust. High trust supports lookahead. As trust declines, direct interaction becomes more informative than prediction, and under a sustained decline the Controller rebuilds the state over a broader trajectory.</p>
+
+        <h3 class="subhead">Correcting the world model</h3>
+        <p>Prediction error is useful when it changes later decisions. A mismatch that recurs under the same action and in structurally similar conditions becomes a candidate precondition. The candidate is admitted only when it rejects at least one observed failure without contradicting an earlier successful transition, which keeps isolated accidents out of the world model.</p>
+      </section>
+
+      <!-- ============================ RESULTS ============================ -->
+      <section class="section" id="results">
+        <h2 class="section__title">What the experiments show</h2>
+        <p>We evaluate both frameworks on interactive planning environments (ALFWorld, ScienceWorld, WebShop and AppWorld) and on a variant of ScienceWorld in which the environment changes without notice during interaction. The full tables are in the two papers. Here we keep the three observations that matter for the argument of this post.</p>
+
+        <h3 class="subhead" id="q1">The form of memory matters</h3>
+        <p>The gains of EVA depend on the form in which experience is kept. Removing the quasi-symbolic abstraction has a larger effect than removing the Controller or the memory, and keeping raw trajectories is close to having no abstraction at all. The typed state is the common structure through which perception, memory and control interact <span class="cite" data-paper="eva"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-form"></div>
+          <figcaption><b>Figure 3. The representation matters.</b> ALFWorld success when one component is removed or the memory format is replaced.</figcaption>
+        </figure>
+
+        <p><b>Failures are worth remembering.</b> A configuration that stores only verified successes stays close to the full model on static benchmarks and falls behind when the environment changes. Constraints derived from localised failures are what the agent reuses to recover.</p>
+
+        <h3 class="subhead" id="q2">Predicting before acting helps</h3>
+        <p>WEVA improves over EVA across the environments, and the benefit is most apparent when the dynamics change or when tasks chain several preconditions across applications. Search over predicted states raises task success, while checking predicted transitions against active preconditions removes most of the verified violations <span class="cite" data-paper="weva"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-weva"></div>
+          <figcaption><b>Figure 4. WEVA against EVA.</b> Task outcome across four environments, with the same backbone and interaction budget.</figcaption>
+        </figure>
+
+        <h3 class="subhead" id="q3">The agent can notice that the world has changed</h3>
+        <p>An agent can keep completing tasks for a while after its expectations have become stale. In the shifted environment, model trust falls below its alert level before task success degrades. As trust decreases, the Controller moves from lookahead towards direct interaction and towards rebuilding the state, and a predicted side effect on a file or a booking that should stay untouched can be rejected before it happens.</p>
+      </section>
+
+
+      <!-- ============================ CLOSING ============================ -->
+      <section class="section" id="closing">
+        <h2 class="section__title">Closing thoughts and future work</h2>
+        <p>In this post we described two frameworks built on the same idea. EVA distils experience into quasi-symbolic abstractions and uses them to remember, retrieve and regulate. WEVA turns the same abstractions into a predictive model and checks consequences before acting. A central takeaway is that the way experience is represented determines what an agent can later do with it.</p>
+        <p>Several limits remain. Building abstractions and running lookahead add computation at every step. The schema of the abstraction is designed by hand. Confidence, model trust and acquired preconditions are approximate signals obtained from interaction, and they are not calibrated estimates.</p>
+        <p>These limits lead to open questions. Can the Controller keep learning during interaction instead of being fixed after calibration? Can the structure of the state be induced instead of designed? How should model trust be calibrated? In multi-agent settings, can the disagreement between what an agent reports and what another agent predicts help decide whether shared information is reliable? The essay <a href="/adaptive-reasoning-agency/">Adaptive Reasoning Agency</a> places these questions in a broader research programme.</p>
+      </section>
+
+      <!-- ============================ CASES ============================ -->
+      <section class="section" id="cases">
+        <h2 class="section__title">Case studies</h2>
+
+        <h3 class="subhead">A. What EVA keeps from a WebShop task</h3>
+        <p><b>The stored abstraction keeps the procedure and leaves out the product.</b> The task below ends in a successful purchase. What enters memory is a search, verify and purchase procedure that a later request can reuse by replacing the category and the candidate product.</p>
+        <div class="tabs" data-tabs>
+          <div class="tabs__bar" role="tablist">
+            <button type="button" class="seg is-active" data-tab="0">The task</button>
+            <button type="button" class="seg" data-tab="1">The interaction</button>
+            <button type="button" class="seg" data-tab="2">What is stored</button>
+            <button type="button" class="seg" data-tab="3">Later reuse</button>
+          </div>
+          <div class="tabs__panel" data-panel="0">
+            <dl class="kv">
+              <div><dt>Goal</dt><dd>Find a product matching the query “grocery cookies”.</dd></div>
+              <div><dt>Selected product</dt><dd>Walkers Shortbread Saltire Shortbread Rounds Tin, 120 g, $18.95.</dd></div>
+              <div><dt>Category</dt><dd>Grocery and Gourmet Food, Breads and Bakery, Cookies, Shortbread.</dd></div>
+              <div><dt>Options</dt><dd>None. The item requires no size, flavour or colour selection.</dd></div>
+            </dl>
+          </div>
+          <div class="tabs__panel" data-panel="1" hidden>
+            <dl class="kv">
+              <div><dt>Perceptor</dt><dd>Identifies the central requirement as a category match. The target has to be a grocery item classified as cookies. No price limit or option is specified.</dd></div>
+              <div><dt>Controller</dt><dd>Lets the Actor search for the category. Once a candidate is retrieved, it requires the product page to be inspected before purchase.</dd></div>
+              <div><dt>Actor</dt><dd><span class="mono">search[grocery cookies]</span>, inspect the candidates, <span class="mono">click[Walkers Shortbread …]</span>, verify category, price and options, <span class="mono">click[Buy Now]</span>.</dd></div>
+              <div><dt>Resolution</dt><dd>The item satisfies the goal, and no option or conflicting attribute remains unresolved before purchase.</dd></div>
+            </dl>
+          </div>
+          <div class="tabs__panel" data-panel="2" hidden>
+            <dl class="kv">
+              <div><dt>Type</dt><dd>Product-selection procedure, stored with a SUCCESS label.</dd></div>
+              <div><dt>Goal pattern</dt><dd>Find and purchase a product that matches a requested category.</dd></div>
+              <div><dt>Procedure (T)</dt><dd>Form a query from the category, inspect the candidates, open the most relevant page, verify title, category, price and options, purchase once every requirement has been checked.</dd></div>
+              <div><dt>Constraints (C)</dt><dd>The category is verified on the product page. Any required option is selected before purchase. No purchase while an explicit requirement remains unverified.</dd></div>
+            </dl>
+          </div>
+          <div class="tabs__panel" data-panel="3" hidden>
+            <dl class="kv">
+              <div><dt>New request</dt><dd>“Find grocery crackers.”</dd></div>
+              <div><dt>Retrieve and bind</dt><dd>EVA retrieves the abstraction, replaces the target category and the candidate product, and keeps the search, inspect, verify and purchase procedure.</dd></div>
+              <div><dt>What changes</dt><dd>Only the values of the entities. The transitions and the constraints are reused as they are.</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <h3 class="subhead">B. WEVA on a WorldBench task</h3>
+        <p><b>The error is the same in both runs, and only one of them executes it.</b> The folder contains two ledgers that look alike. An agent that acts first edits the old copy and discovers the error after the file has changed. WEVA predicts the outcome of each candidate and prunes that edit.</p>
+        <div class="tabs" data-tabs>
+          <div class="tabs__bar" role="tablist">
+            <button type="button" class="seg is-active" data-tab="0">The task</button>
+            <button type="button" class="seg" data-tab="1">Act, then observe</button>
+            <button type="button" class="seg" data-tab="2">Predict, check, then act</button>
+          </div>
+          <div class="tabs__panel" data-panel="0">
+            <dl class="kv">
+              <div><dt>Instruction</dt><dd>“Record the short delivery in the stock ledger and leave a note for the pharmacist.”</dd></div>
+              <div><dt>Files</dt><dd><span class="mono">delivery_note</span> (60 Amoxicillin ordered, 40 delivered), <span class="mono">ledger</span> (the current ledger, the target), <span class="mono">ledger_2025</span> (last year’s copy, which has to stay as it is).</dd></div>
+              <div><dt>Success requires</dt><dd>Row 4 of the ledger set to short delivery, a note naming Amoxicillin, and no other file changed.</dd></div>
+            </dl>
+          </div>
+          <div class="tabs__panel" data-panel="1" hidden>
+            <div class="tablewrap">
+              <table class="lookahead">
+                <thead><tr><th>Step</th><th>Action</th><th>What happens</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>Read the delivery note</td><td>40 of 60 delivered.</td></tr>
+                  <tr><td>2</td><td>Edit row 4 of <span class="mono">ledger_2025</span></td><td>The wrong file is modified.</td></tr>
+                  <tr><td>3</td><td>Write the note</td><td>The task checks pass.</td></tr>
+                  <tr><td>Evaluation</td><td></td><td><span class="chip chip--fail">Constrained task success 0</span> The old copy has changed.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tabs__panel" data-panel="2" hidden>
+            <div class="tablewrap">
+              <table class="lookahead">
+                <caption>Current state. Files: ledger, ledger_2025. Precondition: only the ledger and the note may change. Progress 0 of 2.</caption>
+                <thead><tr><th>Candidate action</th><th>Predicted state (not executed)</th><th>Check</th></tr></thead>
+                <tbody>
+                  <tr><td>Edit <span class="mono">ledger_2025</span></td><td>The old copy has changed.</td><td><span class="chip chip--fail">Breaks C, pruned</span></td></tr>
+                  <tr><td>Finish the task</td><td>Task closed, progress 0 of 2.</td><td><span class="chip chip--neutral">No progress</span></td></tr>
+                  <tr><td>Edit <span class="mono">ledger</span></td><td>Row 4 set to short delivery, progress 1 of 2.</td><td><span class="chip chip--pass">Consistent, executed</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="tabs__note">Only the executed action reaches the environment. The observed state matches the prediction, and model trust stays high. After the note is written, the ledger is updated, the old copy is untouched and constrained task success is 1.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ PAPERS ============================ -->
+      <section class="section" id="papers">
+        <h2 class="section__title">Papers and citation</h2>
+        <ul class="papers papers--all" data-papers="eva,weva,quasar,worldbench"></ul>
+        <p>If this post is useful for your work, please consider citing the two papers.</p>
+<pre class="bib"><code>@inproceedings{ranaldi-2026-evolving,
+  title     = {Evolving Agents},
+  author    = {Ranaldi, Leonardo},
+  booktitle = {Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  year      = {2026},
+  pages     = {16561--16569},
+  publisher = {Association for Computational Linguistics}
+}
+
+@inproceedings{ranaldi-2026-world,
+  title     = {World-Model Evolving Agents},
+  author    = {Ranaldi, Leonardo},
+  booktitle = {Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing},
+  year      = {2026},
+  pages     = {49279--49294},
+  publisher = {Association for Computational Linguistics}
+}</code></pre>
+      </section>
+
+      <footer class="footer">
+        <p>Leonardo Ranaldi. With thanks to my collaborators, mentors and students.</p>
+        <p><a href="/blog/">All posts</a> and <a href="/">homepage</a></p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="/assets/js/agent-anim.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

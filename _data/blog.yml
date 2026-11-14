@@ -1,0 +1,13 @@
+# Blog index. To add a post, copy one entry and edit it.
+# `url` can be a page of this site (starting with /) or an external address.
+- title: "Adaptive Reasoning Agency"
+  subtitle: "The extent to which agents should adapt."
+  date: "November 2026"
+  url: "/adaptive-reasoning-agency/"
+  summary: "A research essay on agents that learn when and how their behaviour should change, organised around four capacities (represent, revise, consolidate, anticipate), with the mechanisms, the diagnostic evidence and the questions that remain open."
+
+- title: "Evolving Agents"
+  subtitle: "How agents turn experience into procedures, and procedures into predictions."
+  date: "November 2026"
+  url: "/evolving-agents/"
+  summary: "A technical post on EVA and WEVA. It follows how a trajectory becomes a quasi-symbolic abstraction in memory, how a world model checks candidate actions before execution, and what the experiments show."

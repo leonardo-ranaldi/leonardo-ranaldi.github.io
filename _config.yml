@@ -1,0 +1,36 @@
+title: "Leonardo Ranaldi"
+description: "Research Fellow at the University of Edinburgh and Researcher at the University of Rome Tor Vergata. LLM reasoning, memory-augmented and adaptive agents."
+url: "https://leonardo-ranaldi.github.io"
+baseurl: ""
+
+author:
+  name: "Leonardo Ranaldi"
+  avatar: "images/img.jpeg"
+  location: "Edinburgh, UK"
+  email: "name.surname [at] ed.ac.uk"
+  googlescholar: "https://scholar.google.com/citations?user=u2FWGIIAAAAJ"
+  researchgate: "https://www.researchgate.net/profile/Leonardo-Ranaldi"
+  orcid: "https://orcid.org/0000-0001-8488-4146"
+
+include:
+  - _pages
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
+markdown: kramdown
+kramdown:
+  input: GFM
+
+plugins:
+  - jekyll-redirect-from
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+      author_profile: true

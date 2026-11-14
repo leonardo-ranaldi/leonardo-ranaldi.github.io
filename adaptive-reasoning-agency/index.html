@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adaptive Reasoning Agency | Leonardo Ranaldi</title>
+  <meta name="description" content="A research essay on agents that learn when and how their behaviour should change: representation, revision, consolidation and anticipation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/assets/css/agent-anim.css" />
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("ara-theme"); } catch (e) {}
+      if (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) t = "dark";
+      if (t === "dark") document.documentElement.classList.add("dark");
+    })();
+  </script>
+</head>
+<body>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__brand" href="#top">Adaptive Reasoning Agency</a>
+      <nav class="topbar__nav" aria-label="Site">
+        <a href="#papers">Papers</a>
+        <a href="/blog/">Blog</a>
+        <a href="/">Leonardo Ranaldi</a>
+        <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark theme">
+          <span class="theme-btn__light">Dark theme</span><span class="theme-btn__dark">Light theme</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout" id="top">
+    <aside class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <nav>
+        <a class="toc__item" href="#opening">The flight is booked, the return is gone</a>
+        <a class="toc__item" href="#decision">Adaptation as a decision</a>
+        <a class="toc__item toc__item--act" href="#represent"><span class="toc__num">I</span>Represent</a>
+        <a class="toc__item toc__item--act" href="#revise"><span class="toc__num">II</span>Revise</a>
+        <a class="toc__item toc__item--act" href="#consolidate"><span class="toc__num">III</span>Consolidate</a>
+        <a class="toc__item toc__item--act" href="#anticipate"><span class="toc__num">IV</span>Anticipate</a>
+        <a class="toc__item" href="#collective">When procedures become shared</a>
+        <a class="toc__item" href="#ahead">The research ahead</a>
+        <a class="toc__item" href="#papers">Papers</a>
+      </nav>
+    </aside>
+
+    <main class="article">
+
+      <!-- ============================ HERO ============================ -->
+      <section class="hero">
+        <h1 class="hero__title">Adaptive Reasoning Agency</h1>
+        <p class="hero__dek">The extent to which agents should adapt.</p>
+        <p class="hero__by">Leonardo Ranaldi, University of Edinburgh and University of Rome Tor Vergata. Based on a talk given in September 2026.</p>
+
+        <p class="hero__lead">Language agents powered by LLMs can plan, use tools and complete tasks that would otherwise take hours of human work. Yet they remain brittle when past experience no longer reflects the situation they face. A chatbot that answers incorrectly can be asked again, while an agent may already have edited a file, called an API or changed a database. The question is how far past experience should guide future actions, and what evidence should prompt an agent to adapt.</p>
+        <p class="hero__lead">This essay examines adaptation as a reasoning problem. An agent needs to recognise what should remain stable across contexts, revise its decisions when evidence changes, turn experience into reusable procedures, and anticipate failures before acting. Together, these capacities help explain when an agent should change its behaviour and when it should retain what already works.</p>
+
+        <figure class="figure figure--hero">
+          <div class="ledger" id="ledger" data-state="task">
+            <div class="ledger__request">
+              <p class="label">Request to the agent</p>
+              <p class="ledger__quote">Book me a flight from Rome to Edinburgh for Monday morning. My return flight and my hotel are already booked.</p>
+            </div>
+            <table class="ledger__table">
+              <thead><tr><th>Booking in the itinerary</th><th>After the run</th></tr></thead>
+              <tbody>
+                <tr><td>Outbound flight, Rome to Edinburgh</td><td>Booked</td></tr>
+                <tr class="ledger__hidden"><td>Return flight, already paid</td><td><span class="chip chip--fail">Replaced</span></td></tr>
+              </tbody>
+            </table>
+            <div class="ledger__checks">
+              <p class="check"><span class="check__name">Task check</span><span class="chip chip--pass">Pass</span></p>
+              <p class="check ledger__hidden"><span class="check__name">Preservation check</span><span class="chip chip--fail">Fail</span></p>
+              <button class="btn" id="ledger-btn" type="button">Inspect the itinerary</button>
+            </div>
+          </div>
+          <figcaption><b>One run, two verdicts.</b> The outbound flight is booked and the task metric reports success. The return flight, which nobody asked the agent to touch, has been replaced by a different one. Useful work includes leaving untouched the things that should stay untouched.</figcaption>
+        </figure>
+      </section>
+
+      <section class="glance" aria-label="Summary">
+        <h2 class="glance__title">At a glance</h2>
+        <ul class="glance__list">
+<li><b>Adaptation is a decision.</b> We study how agents can learn when their current way of acting should change.</li>
+
+<li><b>Structure supports transfer.</b> Quasi-symbolic abstractions make reasoning structures explicit while retaining the flexibility of natural language.</li>
+
+<li><b>Agreement can be regulated.</b> A learned policy helps models decide when to challenge, clarify or accept user-provided information.</li>
+
+<li><b>Prediction exposes failure early.</b> A learned world model allows agents to assess possible consequences before acting and detect when their expectations become unreliable.</li>
+        </ul>
+      </section>
+
+      <!-- ============================ OPENING ============================ -->
+      <section class="section" id="opening">
+        <h2 class="section__title">The flight is booked, the return is gone</h2>
+        <p>The request above is an ordinary one. The agent searches the available flights from Rome, selects one and completes the purchase, and the evaluation that accompanies most agent benchmarks confirms that the task was completed. The failure becomes visible only when the itinerary is inspected after the run, where a booking that should have remained unchanged has been replaced.</p>
+        <p>Two distinct lessons are available from this episode. The first concerns the task and states which booking should have been made. The second concerns the procedure and states that, before changing any booking, the agent should establish which parts of the itinerary must be preserved. The first lesson repairs one run. The second changes how the agent works on later tasks, including tasks that share little surface with this one.</p>
+        <p>Today a developer inspects the failure and adds the check by hand. The research question is whether the agent can learn to make that change itself, which requires deciding what the experience shows, which part of the procedure needs attention, and whether the revision holds on another task.</p>
+      </section>
+
+      <!-- ============================ DECISION ============================ -->
+      <section class="section" id="decision">
+        <h2 class="section__title">Adaptation as a decision the agent should learn</h2>
+        <p>An agent selects actions through a task policy. Adaptation introduces a second level of decision-making, where the agent determines whether its current way of acting still holds after a user pushes back, an action fails or the environment moves. Three regimes can be distinguished by where that second decision comes from.</p>
+
+        <div class="trio">
+          <div class="trio__item">
+            <p class="trio__name">Fixed rule</p>
+            <p class="trio__quote">“If this happens, revise.”</p>
+            <p class="trio__note">The trigger and the response are defined in advance by the developer.</p>
+          </div>
+          <div class="trio__item">
+            <p class="trio__name">Adaptive policy</p>
+            <p class="trio__quote">“Read the evidence, then decide.”</p>
+            <p class="trio__note">The response is chosen case by case, although the policy that chooses it stays fixed.</p>
+          </div>
+          <div class="trio__item trio__item--focus">
+            <p class="trio__name">Learning to adapt</p>
+            <p class="trio__quote">“Use last time to decide better.”</p>
+            <p class="trio__note">Experience improves the policy that makes those choices.</p>
+          </div>
+        </div>
+
+        <p>The object being learned in the third regime is an adaptation policy. A retained experience earns its place only if it improves later behaviour, which gives a concrete test for every stored lesson: whether it prevented an error, whether it led to a better outcome, and what it cost.</p>
+        <p>The remainder of this essay follows four capacities that this view requires. The agent first needs a representation of what matters in the context and how its elements relate. Given that representation, it must decide whether new evidence justifies a change. A change that helps should survive beyond the single case, and a consolidated procedure should eventually allow the agent to change before it gets something wrong.</p>
+
+        <ol class="acts">
+          <li><a href="#represent"><span class="acts__n">I</span><span class="acts__t">Represent</span><span class="acts__q">What stays the same when the world changes?</span></a></li>
+          <li><a href="#revise"><span class="acts__n">II</span><span class="acts__t">Revise</span><span class="acts__q">Which evidence is worth changing my mind for?</span></a></li>
+          <li><a href="#consolidate"><span class="acts__n">III</span><span class="acts__t">Consolidate</span><span class="acts__q">What should this episode leave behind?</span></a></li>
+          <li><a href="#anticipate"><span class="acts__n">IV</span><span class="acts__t">Anticipate</span><span class="acts__q">Can I change before I get it wrong?</span></a></li>
+        </ol>
+      </section>
+
+      <!-- ============================ I REPRESENT ============================ -->
+      <section class="section section--act" id="represent">
+        <p class="act-mark"><span>I</span> Represent</p>
+        <h2 class="section__title">What can reasoning preserve across contexts?</h2>
+        <p>Reasoning strategies do not always transfer across languages or models. This raises a fundamental question: what aspects of reasoning remain stable when the context changes? Our earlier studies provide evidence across different models, languages and representations.</p>
+
+        <div class="origins">
+          <div class="origin">
+            <p class="origin__name">Across models</p>
+            <p>A small model learns a complex capability from a larger one through distilled demonstrations. What transfers is the shape of the demonstration, that is, the order of the steps and the way the problem is posed and solved <span class="cite" data-paper="align,selfrefine"></span>.</p>
+          </div>
+          <div class="origin">
+            <p class="origin__name">Across languages</p>
+            <p>A reasoning strategy that works in one language may become less reliable in another. Performance follows the surface of the prompt, which indicates that the procedure was attached to the words in which it was learned <span class="cite" data-paper="icl"></span>.</p>
+          </div>
+          <div class="origin">
+            <p class="origin__name">Across representations</p>
+            <p>Writing the reasoning as code makes the structure explicit and language-independent, and step-wise accuracy improves. A programme, however, must be complete, whereas most problems are only partly formalisable <span class="cite" data-paper="pal"></span>.</p>
+          </div>
+        </div>
+
+        <h3 class="subhead">Checkable or flexible</h3>
+        <p>Formal logic makes reasoning steps explicit and verifiable, but applying it to open-ended problems can be difficult. Natural language is more flexible, although its reasoning is harder to verify. Quasi-symbolic abstractions connect these approaches by representing roles and relations explicitly, which makes them checkable, while keeping their content in natural language. The representation therefore works in open settings without requiring a full translation into formal logic <span class="cite" data-paper="quasar"></span>.</p>
+
+        <figure class="figure">
+          <div class="syll">
+            <div class="syll__col">
+              <p class="label">Content</p>
+              <p class="syll__line">All cats are animals.</p>
+              <p class="syll__line">All mammals are animals.</p>
+              <p class="syll__line syll__line--c">Therefore, all cats are mammals.</p>
+              <p class="syll__verdict"><span class="chip chip--neutral">Plausible conclusion</span></p>
+            </div>
+            <div class="syll__col syll__col--form">
+              <p class="label">Structure</p>
+              <p class="syll__line mono">All X are Y.</p>
+              <p class="syll__line mono">All Z are Y.</p>
+              <p class="syll__line syll__line--c mono">Therefore, all X are Z.</p>
+              <p class="syll__verdict"><span class="chip chip--fail">Invalid deduction</span></p>
+            </div>
+          </div>
+          <figcaption><b>A plausible conclusion with an invalid argument.</b> The conclusion is true in the world and the deduction is invalid. Removing the content exposes the form, and the form is what the validity judgement depends on. The tendency to let believability override validity is known as content effect, in humans and in LLMs.</figcaption>
+        </figure>
+
+        <p>Content effect offers a direct test of whether explicit structure changes behaviour. We compare free-form reasoning with deductive prompting, with quasi-symbolic guidance (QuaSAR), and with Boethius, a schema-guided framework that separates the identification of the logical schema from its instantiation on the concrete predicates <span class="cite" data-paper="boethius"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-content"></div>
+          <figcaption><b>Making structure explicit reduces content effect.</b> The comparison suggests that reasoning becomes less sensitive to misleading content when logical structures are made explicit. Schema-guided approaches help models distinguish the validity of an argument from the plausibility of its conclusion.</figcaption>
+        </figure>
+
+        <h3 class="subhead">From the prompt to the activations</h3>
+        <p>The distinction between content and structure also matters inside the model. An Abstractor aims to bring internal representations closer to the underlying reasoning pattern, reducing their dependence on the particular words used in a problem. This provides a way to study whether abstract reasoning can be recovered from ordinary inputs and carried across languages <span class="cite" data-paper="aas"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-abstractor"></div>
+<figcaption><b>Abstract reasoning across languages.</b> The results suggest that internal representations of reasoning structure can transfer across languages, even when the abstraction mechanism is learned from English examples. The degree of transfer varies across linguistic settings.</figcaption>
+        </figure>
+
+        <aside class="open">
+          <p class="open__label">Open question</p>
+          <p class="open__q">Is the structure we write the structure the model uses?</p>
+          <p>The term structure has been used here for two objects, the schema supplied in the prompt and the region reached by intervening on the activations. If the two align, one measure of structure would predict both what the model does and what it holds internally. Establishing this correspondence is the first open problem of the programme.</p>
+        </aside>
+
+        <ul class="papers" data-papers="align,selfrefine,icl,pal,quasar,boethius,aas"></ul>
+      </section>
+
+      <!-- ============================ II REVISE ============================ -->
+      <section class="section section--act" id="revise">
+        <p class="act-mark"><span>II</span> Revise</p>
+        <h2 class="section__title">Which evidence should change behaviour?</h2>
+        <p>An agent can fail in two opposite directions. It can yield to a confident source that is wrong, and it can resist a correction that is right. A single threshold cannot resolve both failures, since tightening it against one makes the other more frequent. Helpful adaptation therefore includes the ability to challenge a claim.</p>
+
+        <figure class="figure">
+          <div class="dialogue" id="dialogue">
+            <p class="turn turn--user"><span class="turn__who">User</span>Which documents are required for my application?</p>
+            <p class="turn turn--agent"><span class="turn__who">Agent</span>An ID scan and proof of address are required.</p>
+            <p class="turn turn--user turn--pressure"><span class="turn__who">User</span>The guidelines say only an ID scan. You are wrong!</p>
+            <div class="dialogue__choice" role="group" aria-label="Agent response">
+              <button type="button" class="seg is-active" data-reply="none">Without a policy</button>
+              <button type="button" class="seg" data-reply="counter">Counter</button>
+              <button type="button" class="seg" data-reply="clarify">Clarify</button>
+              <button type="button" class="seg" data-reply="align">Align</button>
+            </div>
+            <p class="turn turn--agent turn--reply" id="reply" aria-live="polite"></p>
+            <p class="dialogue__note" id="reply-note"></p>
+          </div>
+          <figcaption><b>The question stays the same and the pressure changes.</b> The rules, the agent and the question are unchanged. The only new evidence is the confidence with which the user spoke. Select an action to see how the response differs when agreement is treated as a decision.</figcaption>
+        </figure>
+
+        <p>We argue that sycophancy is a policy-level failure. Existing approaches often intervene on the generated response, leaving the decision of when to agree or disagree implicit. We model agreement as a choice among interaction strategies: challenging unsupported claims (counter), requesting additional information (clarify), or accepting a correction when supported by evidence (align) <span class="cite" data-paper="sycophancy"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-syco"></div>
+          <figcaption><b>Resisting misleading user pressure.</b> When a user confidently suggests an incorrect answer, the model may follow that suggestion despite having the knowledge needed to respond correctly. Learning when to challenge such signals helps preserve task accuracy across models.</figcaption>
+        </figure>
+
+        <h3 class="subhead">Different evidence needs different checks</h3>
+        <p>In multi-agent settings, pressure can also come from other models. A contested answer may rely on a chain of claims that is difficult to evaluate from the final response alone. Dialectic oversight makes these claims explicit: experts present competing arguments, challenge each other's premises, and a judge evaluates which position is better supported <span class="cite" data-paper="dialectic"></span>. The appropriate verification procedure depends on the evidence. Retrieved passages can be compared, while formal reasoning can help assess whether proposed decisions satisfy explicit constraints, as explored in patient–trial matching <span class="cite" data-paper="clinical"></span>.</p>
+
+        <div class="flow" aria-label="Dialectic oversight">
+          <div class="flow__node"><b>Expert A</b>Claim and supporting evidence</div>
+          <div class="flow__node"><b>Expert B</b>Competing claim and challenge</div>
+          <div class="flow__node flow__node--key"><b>Judge</b>Compares explicit arguments before the decision</div>
+        </div>
+
+        <aside class="open">
+          <p class="open__label">Open question</p>
+          <p class="open__q">Can revision follow the evidence?</p>
+          <p>An explicit policy improves accuracy, and explicit arguments can be challenged. An important question remains: does the model revise its position because the evidence has changed, or simply because another argument was presented?</p>
+        </aside>
+
+        <ul class="papers" data-papers="sycophancy,dialectic,clinical"></ul>
+      </section>
+
+      <!-- ============================ III CONSOLIDATE ============================ -->
+      <section class="section section--act" id="consolidate">
+        <p class="act-mark"><span>III</span> Consolidate</p>
+        <h2 class="section__title">How does an agent learn from experience?</h2>
+        <p>Storing an interaction retains what happened. It does not guarantee that the next decision improves. The difficulty of memory lies in retaining something that remains useful when the situation changes, which again depends on the form in which experience is kept.</p>
+        <p>Consider a request from WebShop: “Find me a pair of black-and-blue sneakers that are good in rain weather, have puffy soles, and cost less than $90.” Each requirement needs evidence from the candidate product. A quasi-symbolic memory keeps the relations in explicit fields and lets language supply the current case.</p>
+
+        <figure class="figure">
+          <div class="qcard">
+            <div class="qcard__head">
+              <p class="label">Quasi-symbolic state</p>
+              <p class="qcard__title">Purchase under attribute constraints</p>
+            </div>
+            <dl class="qcard__fields">
+              <div><dt>Actors and resources</dt><dd>Candidate sneakers, selected option, price: $79</dd></div>
+              <div><dt>Transitions</dt><dd>Inspect details to resolve rain suitability</dd></div>
+              <div><dt>Constraints</dt><dd>Purchase after every required attribute has evidence</dd></div>
+              <div><dt>Outcomes</dt><dd>Rain suitability: unknown. Purchase still pending.</dd></div>
+            </dl>
+          </div>
+          <figcaption><b>Experience in a reusable form.</b> The fields preserve the relations and the values describe the present product. The checking procedure can be reused as it is, and a new product changes only the values.</figcaption>
+        </figure>
+
+        <h3 class="subhead">EVA: a trace becomes a procedure</h3>
+        <p>We introduce EVA (Evolving Agents), which consolidates trajectories into reusable problem-solving mechanisms through this representation. The Perceptor observes the environment and maps the trajectory into a quasi-symbolic abstraction. The Actor conditions its policy on that abstraction and selects a tool action. The Controller decides whether to act, rebuild the abstraction, retrieve an earlier procedure or recover. The three modules read and update the same state <span class="cite" data-paper="eva"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="anim" data-anim="eva"></div>
+          <figcaption><b>From a trajectory to memory.</b> The Perceptor turns the recent interaction into a quasi-symbolic abstraction, the Controller decides how to proceed, and the Actor acts on that state. Verified successes and instructive failures are stored, retrieved by structure and reused on later tasks. The Controller is calibrated before interaction and held fixed during it, whilst the Perceptor and the Actor keep learning from realised trajectories.</figcaption>
+        </figure>
+        <p>A longer technical post, <a href="/evolving-agents/">Evolving Agents</a>, follows EVA and WEVA step by step.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-ablation"></div>
+          <figcaption><b>The representation matters.</b> The ablation study shows that removing quasi-symbolic abstractions has a substantial effect on task performance. These representations provide the common structure through which perception, memory and control interact.</figcaption>
+        </figure>
+
+        <aside class="open">
+          <p class="open__label">Open question</p>
+          <p class="open__q">Did memory improve the next decision?</p>
+          <p>Task success measures the outcome of a whole interaction. It cannot isolate whether a stored lesson helped the agent choose. The proposed test replays the same decision state and changes only the memory it receives, comparing a relevant procedure, a random procedure and no memory.</p>
+        </aside>
+
+        <ul class="papers" data-papers="eva,quasar"></ul>
+      </section>
+
+      <!-- ============================ IV ANTICIPATE ============================ -->
+      <section class="section section--act" id="anticipate">
+        <p class="act-mark"><span>IV</span> Anticipate</p>
+        <h2 class="section__title">Can the agent change before the error?</h2>
+        <p>EVA asks how past experience changes the next decision. WEVA (World-Model Evolving Agents) asks whether the decision can change before the consequence becomes irreversible. WEVA predicts the states induced by candidate actions, discards the branches that violate learned preconditions, executes the first step of the best surviving branch and compares the prediction with what is observed <span class="cite" data-paper="weva"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="anim" data-anim="weva"></div>
+          <figcaption><b>Predict, check, then act.</b> The request is the one that opens this essay. Candidate actions are rolled forward by the world model, a predicted transition that breaks an active precondition is pruned, and only a consistent action reaches the environment. The agreement between predicted and observed states gives the model-trust signal that tells the Controller when lookahead is still reliable.</figcaption>
+        </figure>
+
+        <p>The same procedure applies to the shopping task of the previous section.</p>
+
+        <figure class="figure figure--wide">
+          <div class="tablewrap">
+            <table class="lookahead">
+              <caption>Task: buy the sneakers that passed the checks. The shop has signed the agent out.</caption>
+              <thead><tr><th>Candidate action</th><th>Predicted consequence</th><th>Decision</th></tr></thead>
+              <tbody>
+                <tr><td>Buy now</td><td>Checkout fails. There is no session, and rain evidence is still missing.</td><td><span class="chip chip--fail">Reject</span></td></tr>
+                <tr><td>Open product details</td><td>Rain suitability resolved, checkout still unreachable.</td><td><span class="chip chip--neutral">Keep for later</span></td></tr>
+                <tr><td>Sign in</td><td>Authenticated access becomes available.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figcaption><b>A world model checks an action before execution.</b> WEVA keeps the sign-in branch and executes its first action. When the prediction (“signing in opens the checkout”) meets a different observation (“the checkout opens and the basket is now empty”), a repeated and supported mismatch becomes a revised precondition, namely that after signing in the agent verifies that the chosen item is still in the basket.</figcaption>
+        </figure>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-weva"></div>
+          <figcaption><b>Predicting consequences improves agent performance.</b> WEVA is compared with EVA across interactive environments. The benefits are particularly apparent when environmental dynamics change or tasks require coordination across applications.</figcaption>
+        </figure>
+
+        <h3 class="subhead">The signal changes before task success does</h3>
+        <p>The agreement between predicted and observed states provides a measure of model trust. When the environment changes, this signal can deteriorate before task performance declines, indicating that the agent's current expectations may no longer be reliable.</p>
+
+        <figure class="figure figure--wide">
+          <svg class="timeline" viewBox="0 0 720 190" role="img" aria-label="Timeline: environment changes at step 500, trust alert at step 545, task success degrades about 70 steps later">
+            <rect class="tl-band" x="246" y="46" width="252" height="76" />
+            <line class="tl-axis" x1="30" y1="122" x2="690" y2="122" />
+            <g class="tl-ticks"></g>
+            <line class="tl-stem" x1="84" y1="60" x2="84" y2="122" /><circle class="tl-dot" cx="84" cy="60" r="5" />
+            <line class="tl-stem tl-stem--keep" x1="246" y1="60" x2="246" y2="122" /><circle class="tl-dot tl-dot--keep" cx="246" cy="60" r="5" />
+            <line class="tl-stem tl-stem--fail" x1="498" y1="60" x2="498" y2="122" /><circle class="tl-dot tl-dot--fail" cx="498" cy="60" r="5" />
+            <text class="tl-step" x="84" y="42" text-anchor="middle">step 500</text>
+            <text class="tl-step tl-step--keep" x="246" y="42" text-anchor="middle">step 545</text>
+            <text class="tl-step tl-step--fail" x="498" y="42" text-anchor="middle">about step 615</text>
+            <text class="tl-lab" x="84" y="142" text-anchor="middle">environment</text><text class="tl-lab" x="84" y="157" text-anchor="middle">changes</text>
+            <text class="tl-lab tl-lab--keep" x="246" y="142" text-anchor="middle">model trust falls</text><text class="tl-lab tl-lab--keep" x="246" y="157" text-anchor="middle">below its alert level</text>
+            <text class="tl-lab tl-lab--fail" x="498" y="142" text-anchor="middle">task success</text><text class="tl-lab tl-lab--fail" x="498" y="157" text-anchor="middle">degrades (10% rel.)</text>
+            <line class="tl-span" x1="254" y1="88" x2="490" y2="88" />
+            <text class="tl-lead" x="372" y="80" text-anchor="middle">detection lead of about 70 steps</text>
+          </svg>
+          <figcaption><b>An early reason to reconsider.</b> SW-Shift, Qwen3.5-9B. Model trust crosses its alert level about 70 interaction steps before task success crosses its degradation threshold. The size of this lead depends on the thresholds chosen.</figcaption>
+        </figure>
+
+        <div class="pair">
+          <figure class="figure">
+            <div class="chart" id="chart-weva-abl"></div>
+            <figcaption><b>Revision and trust gating both contribute.</b> SW-Shift score (%). Removing revision lowers full WEVA from 68.1% to 59.0%, and removing the trust gate lowers it to 64.0%.</figcaption>
+          </figure>
+          <figure class="figure">
+            <div class="chart" id="chart-ops"></div>
+            <figcaption><b>The Controller changes its operation.</b> Share of selected operations (%). With high trust the Controller relies on lookahead (79.6%), and with low trust it shifts towards rebuilding the abstraction (37.2%).</figcaption>
+          </figure>
+        </div>
+
+        <p>The structured state is what makes the check possible. A structured predictive state reaches 92.8% against 87.3% for free-text prediction, with a logical error rate of 3.2% against 8.3%, since free text provides no fixed field against which an active precondition can be verified.</p>
+
+        <h3 class="subhead">A first step towards adaptation control</h3>
+        <p>In WEVA the signal is learned from experience, whereas the Controller that uses it is calibrated before interaction and fixed during it. A controlled toy experiment, separate from the EVA and WEVA measurements, makes the next step concrete. After a template change, a previously useful editing procedure becomes unsafe across 300 document tasks, and the controller chooses whether to act directly, retrieve a procedure or rebuild the task representation. Safe completion requires that the requested edit is completed and the protected documents are preserved.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-control"></div>
+          <figcaption><b>Checked feedback improves the adaptation choice.</b> Safe completion (%) over 300 document tasks. A policy updated from replayed, checked outcomes reaches 97.7% against 66.7% for the frozen policy (293 against 200 safe completions), at a mean execution cost of 2.95 per task against 4.00 for always rebuilding. The learned change is to rebuild the affected template and stop retrieving its old procedure.</figcaption>
+        </figure>
+
+        <p>The extent to which an agent should adapt can now be stated as a choice of operation together with the computation spent on it.</p>
+
+        <div class="ops">
+          <div class="ops__item"><p class="ops__name">Act</p><p>when the state is simple and stable</p></div>
+          <div class="ops__item"><p class="ops__name">Retrieve</p><p>when a relevant procedure already exists</p></div>
+          <div class="ops__item"><p class="ops__name">Re-abstract</p><p>when the current reading fails to explain what was observed</p></div>
+          <div class="ops__item"><p class="ops__name">Look ahead</p><p>when a mistake at this step would be expensive</p></div>
+        </div>
+
+        <aside class="open">
+          <p class="open__label">Open question</p>
+          <p class="open__q">Can the agent learn from the changes it makes?</p>
+          <p>Representation, action and memory already learn from realised experience. The choice of when and how to adapt is learned before use and then held fixed. The next step is to let checked experience update that choice during interaction, through slow policy updates, verified outcomes and a stable comparison.</p>
+        </aside>
+
+        <ul class="papers" data-papers="weva,eva"></ul>
+      </section>
+
+      <!-- ============================ COLLECTIVE ============================ -->
+      <section class="section" id="collective">
+        <h2 class="section__title">What changes when procedures become shared?</h2>
+        <p>Individual memory captures what an agent has learned from its own experience. Team memory introduces a different problem: deciding which procedures can be safely shared and reused by other agents. With multiple contributors, shared knowledge requires evidence, provenance and mechanisms for resolving conflicts, updating outdated information and maintaining consistency.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-transfer"></div>
+          <figcaption><b>A procedure induced by one agent is usable by another.</b> Success rate (%) for Qwen-2.5 without memory, with a memory of typed abstractions induced by Llama-3 and reused without tuning, and with the memory it induced itself. The transferred memory recovers most of the distance to the self-induced one, including on ScienceWorld-Shift (28.6%→56.4%, against 60.9%).</figcaption>
+        </figure>
+
+        <p>What transfers between the two backbones is the procedure, independently of the weights and of the wording. The benefit is largest where the work divides. EVA-M adds a planner and specialised executors that coordinate through one shared procedural memory, and on AppWorld it raises task goal completion from 51.2% to 57.8% and scenario goal completion from 36.8% to 43.5% with Qwen-2.5-7B <span class="cite" data-paper="eva"></span>.</p>
+
+        <h3 class="subhead">Reuse creates similarity</h3>
+        <p>Sharing a validated procedure avoids duplicated work and repeated failures. It also makes agents more alike. Agents are low-variance decision makers, and given the same context they take the same action, which turns an isolated poor decision into a correlated one. The relevant question is how much of a shared procedure should remain local, and that quantity is measurable.</p>
+
+        <h3 class="subhead">Evaluation has to look at the environment</h3>
+        <p>The opening example shows a broader challenge studied in WorldBench, which evaluates language agents on culturally grounded, multilingual workflows in realistic file-based environments. The benchmark examines both task completion and preservation of the surrounding workspace <span class="cite" data-paper="worldbench"></span>.</p>
+
+        <figure class="figure figure--wide">
+          <div class="chart" id="chart-worldbench"></div>
+          <figcaption><b>Task success is insufficient when agents change the world.</b> Pass rate against constrained task success (%), which additionally requires that the rest of the workspace is left as it was. The difference ranges from 10.1 (Gemini-3.1-Pro, 59.3%→49.2%) to 13.1 (GPT-4o, 51.7%→38.6%). Adaptive agents need process-sensitive evaluation.</figcaption>
+        </figure>
+
+        <aside class="open">
+          <p class="open__label">Open question</p>
+          <p class="open__q">Can adaptation become collective and accountable?</p>
+          <p>Three primitives are candidates, namely provenance (who wrote a procedure, and from what), dissent (a procedure for pressing private evidence) and cost (a price on an unfounded claim). The contribution we aim for is an attribution, in which each primitive is tested against the specific failure it repairs.</p>
+        </aside>
+
+        <ul class="papers" data-papers="eva,dialectic,worldbench"></ul>
+      </section>
+
+      <!-- ============================ AHEAD ============================ -->
+      <section class="section" id="ahead">
+        <h2 class="section__title">Which experience should change the next decision?</h2>
+        <p>This research treats adaptation as a reasoning problem. Structure tells the system what should remain invariant. Evidence tells it when to revise. Memory determines what persists, and prediction determines how far to act. Each capacity leaves one question that the existing results make testable.</p>
+
+        <dl class="questions">
+          <div><dt>Represent</dt><dd>Does explicit structure track what the model uses internally?</dd></div>
+          <div><dt>Revise</dt><dd>Does better evidence lead to a better revision decision?</dd></div>
+          <div><dt>Consolidate</dt><dd>When does a stored procedure improve the next choice?</dd></div>
+          <div><dt>Anticipate</dt><dd>Can the agent learn which adaptation will be worth its cost?</dd></div>
+          <div><dt>Collective</dt><dd>When should one agent’s lesson become shared practice?</dd></div>
+        </dl>
+
+        <blockquote class="hume">
+          <p>“Custom, then, is the great guide of human life.”</p>
+          <footer>David Hume, <cite>An Enquiry Concerning Human Understanding</cite>, Section V</footer>
+        </blockquote>
+        <p>Experience shapes expectations. The aim of this research is to develop agents that can decide when to change their behaviour, what evidence supports the revision, and whether the change improves future decisions.</p>
+      </section>
+
+      <!-- ============================ PAPERS ============================ -->
+      <section class="section" id="papers">
+        <h2 class="section__title">Papers</h2>
+        <p>The work discussed in this essay, in the order in which it appears.</p>
+        <ul class="papers papers--all" data-papers="all"></ul>
+      </section>
+
+      <footer class="footer">
+        <p>Leonardo Ranaldi. With thanks to my collaborators, mentors and students.</p>
+        <p><a href="/blog/">All posts</a> and <a href="/">homepage</a></p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="/assets/js/agent-anim.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

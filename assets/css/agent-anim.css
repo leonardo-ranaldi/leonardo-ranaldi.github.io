@@ -1,0 +1,117 @@
+/* Animated figures for EVA and WEVA. Colours come from the page tokens
+   (--keep, --change-fill, --fail, --pass, --ink, --muted, --line, --surface). */
+
+.anim { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 12px; }
+.anim svg { display: block; width: 100%; height: auto; }
+.anim text { font-family: var(--sans); fill: var(--muted); font-size: 11.5px; }
+.anim .a-title { fill: var(--ink); font-weight: 600; font-size: 13px; }
+.anim .a-sub { font-size: 11px; }
+.anim .a-panel { fill: var(--bg); stroke: var(--line); stroke-width: 1.2; transition: stroke .35s, stroke-width .35s; }
+.anim .a-panel.on { stroke: var(--keep); stroke-width: 2; }
+.anim .a-panel.warn { stroke: var(--fail); stroke-width: 2; }
+
+.anim .a-mod { fill: var(--surface); stroke: var(--ink); stroke-width: 1.4; transition: fill .35s, stroke .35s; }
+.anim .a-mod.on { fill: var(--keep-wash); stroke: var(--keep); }
+.anim .a-modname { fill: var(--ink); font-weight: 600; font-size: 12.5px; }
+.anim .a-chip rect { fill: none; stroke: var(--line); transition: fill .3s, stroke .3s; }
+.anim .a-chip text { font-size: 10px; font-weight: 600; letter-spacing: .02em; transition: fill .3s; }
+.anim .a-chip.on rect { fill: var(--keep); stroke: var(--keep); }
+.anim .a-chip.on text { fill: var(--surface); }
+.anim .a-chip.alert.on rect { fill: var(--fail); stroke: var(--fail); }
+.anim .a-chip.amber.on rect { fill: var(--change-fill); stroke: var(--change-fill); }
+
+.anim .a-arrow { stroke: var(--line); stroke-width: 1.6; fill: none; transition: stroke .3s; }
+.anim .a-arrow.on { stroke: var(--keep); }
+.anim .a-head { fill: var(--line); transition: fill .3s; }
+.anim .a-head.on { fill: var(--keep); }
+
+.anim .a-step { fill: var(--surface); stroke: var(--ink-soft); stroke-width: 1.2; opacity: 0; transition: opacity .4s, fill .4s, stroke .4s; }
+.anim .a-step.show { opacity: 1; }
+.anim .a-step.reuse { fill: var(--keep-wash); stroke: var(--keep); }
+.anim .a-step.fail { fill: var(--fail-wash); stroke: var(--fail); }
+.anim .a-step.ghost { opacity: .25; }
+.anim .a-link { stroke: var(--muted); stroke-width: 1; opacity: 0; transition: opacity .4s; }
+.anim .a-link.show { opacity: 1; }
+.anim .a-res { opacity: 0; transition: opacity .4s; }
+.anim .a-res.show { opacity: 1; }
+.anim .a-res circle { fill: var(--pass-wash); stroke: var(--pass); stroke-width: 1.6; }
+.anim .a-res path { stroke: var(--pass); stroke-width: 2; fill: none; }
+.anim .a-res.bad circle { fill: var(--fail-wash); stroke: var(--fail); }
+.anim .a-res.bad path { stroke: var(--fail); }
+
+.anim .a-rowlab { font-family: var(--mono, ui-monospace, monospace); fill: var(--keep); font-size: 12px; font-weight: 500; }
+.anim .a-seg { fill: var(--keep); opacity: 0; transition: opacity .5s; }
+.anim .a-seg.show { opacity: .8; }
+.anim .a-seg.amber { fill: var(--change-fill); }
+.anim .a-seg.pulse { opacity: 1; }
+.anim .a-track { fill: var(--line-soft); }
+
+.anim .a-path { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+.anim .a-halo { fill: var(--keep); opacity: .16; transform-box: fill-box; transform-origin: center; transform: scale(0); transition: transform .8s ease; }
+.anim .a-node { fill: var(--surface); stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 3; transition: fill .4s, stroke .4s; }
+.anim .a-node.now { stroke: var(--ink); stroke-width: 2.2; stroke-dasharray: none; }
+.anim .a-node.done { fill: var(--pass-wash); stroke: var(--pass); stroke-dasharray: none; stroke-width: 1.8; }
+.anim .a-tick { stroke: var(--pass); stroke-width: 2; fill: none; opacity: 0; transition: opacity .4s; }
+.anim .a-tick.show { opacity: 1; }
+.anim .a-nlab { font-size: 10.5px; }
+
+/* WEVA specific */
+.anim .a-val { fill: var(--ink-soft); font-size: 11.5px; transition: fill .3s; }
+.anim .a-val.new { fill: var(--change); font-weight: 600; }
+.anim .a-val.bad { fill: var(--fail); font-weight: 600; }
+.anim .a-val.hide, .anim .a-hide { opacity: 0; }
+.anim .a-val, .anim .a-box, .anim .a-btext, .anim .a-br, .anim .a-mark { transition: opacity .4s, fill .4s, stroke .4s; }
+.anim .a-box { fill: var(--surface); stroke: var(--ink-soft); stroke-width: 1.2; }
+.anim .a-box.pred { stroke-dasharray: 4 3; }
+.anim .a-box.bad { fill: var(--fail-wash); stroke: var(--fail); }
+.anim .a-box.best { fill: var(--pass-wash); stroke: var(--pass); stroke-dasharray: none; stroke-width: 1.8; }
+.anim .a-box.dim, .anim .a-btext.dim, .anim .a-br.dim { opacity: .35; }
+.anim .a-btext { fill: var(--ink); font-size: 11px; }
+.anim .a-br { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.anim .a-br.bad { stroke: var(--fail); stroke-dasharray: 3 3; }
+.anim .a-br.best { stroke: var(--pass); stroke-width: 2; }
+.anim .a-mark { font-size: 13px; font-weight: 700; }
+.anim .a-mark.bad { fill: var(--fail); }
+.anim .a-mark.best { fill: var(--pass); }
+.anim .a-meter { fill: var(--keep); transition: width .8s ease, fill .5s; }
+.anim .a-meter.low { fill: var(--fail); }
+.anim .a-alert { stroke: var(--fail); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.anim .a-alerttext { fill: var(--fail); font-size: 10px; }
+.anim .a-banner { fill: var(--change-wash); stroke: var(--change-fill); }
+.anim .a-bannertext { fill: var(--change); font-weight: 600; font-size: 11px; }
+
+.anim__cap { font-family: var(--sans); font-size: 14.5px; line-height: 1.45; color: var(--ink); margin: 10px 2px 0; min-height: 2.9em; }
+.anim__cap b { font-weight: 600; color: var(--keep); }
+.anim__bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.anim__btn { font: 500 13px var(--sans); color: var(--ink-soft); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 5px 11px; cursor: pointer; }
+.anim__btn:hover { border-color: var(--muted); color: var(--ink); }
+.anim__dots { display: flex; gap: 5px; margin-left: auto; }
+.anim__dot { width: 9px; height: 9px; border-radius: 50%; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+.anim__dot.on { background: var(--keep); }
+.anim__legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin: 8px 2px 0; padding: 0; list-style: none; }
+.anim__legend li { display: flex; align-items: center; gap: 6px; }
+.anim__legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; }
+.anim__legend i.halo { border-radius: 50%; background: var(--keep); opacity: .3; }
+.anim__legend i.keep { background: var(--keep); }
+.anim__legend i.amber { background: var(--change-fill); }
+.anim__legend i.fail { background: var(--fail); }
+.anim__legend i.pass { background: var(--pass); }
+.anim__tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.anim__tab { font: 500 13.5px var(--sans); color: var(--ink-soft); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.anim__tab.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+html.dark .anim__tab.on { color: var(--bg); }
+@media (prefers-reduced-motion: reduce) { .anim * { transition: none !important; } }
+@media (max-width: 720px) { .anim { overflow-x: auto; } .anim svg { min-width: 640px; } }
+
+/* text content inside the figures */
+.anim .a-mono { font-family: var(--mono, ui-monospace, monospace); font-size: 10.5px; }
+.anim .a-val.reuse { fill: var(--keep); }
+.anim .a-val.new { fill: var(--change); font-weight: 600; }
+.anim .a-tag { font-size: 9.5px; font-weight: 700; letter-spacing: .04em; fill: var(--pass); }
+.anim .a-tag.bad { fill: var(--fail); }
+.anim .a-entry { transition: opacity .6s; }
+.anim .a-entry.dim { opacity: .28; }
+.anim .a-head2 { font-size: 10.5px; font-weight: 600; transition: opacity .4s; }
+.anim .a-mark { font-size: 10.5px; font-weight: 600; fill: var(--muted); }
+.anim .a-val.ok { fill: var(--pass); font-weight: 600; }
+.anim .a-val { font-size: 11px; }

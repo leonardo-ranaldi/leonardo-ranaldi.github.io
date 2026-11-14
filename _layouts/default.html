@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title and page.title != "" %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{{ page.excerpt | default: site.description | strip_html | strip }}">
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    <link rel="icon" href="{{ '/images/favicon.ico' | relative_url }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ '/images/favicon-32x32.png' | relative_url }}">
+    <link rel="apple-touch-icon" href="{{ '/images/apple-touch-icon.png' | relative_url }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem("ara-theme"); } catch (e) {}
+        if (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) t = "dark";
+        if (t === "dark") document.documentElement.classList.add("dark");
+      })();
+    </script>
+  </head>
+
+  <body>
+    {% assign author = site.author %}
+
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a class="topbar__brand" href="{{ '/' | relative_url }}">{{ author.name }}</a>
+        <nav class="topbar__nav" aria-label="Site">
+          {% for link in site.data.navigation.main %}
+            <a href="{{ link.url | relative_url }}">{{ link.title }}</a>
+          {% endfor %}
+          <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark theme">
+            <span class="theme-btn__light">Dark theme</span><span class="theme-btn__dark">Light theme</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <div class="layout">
+      {% if page.author_profile %}
+      <aside class="profile" aria-label="Profile">
+        {% if author.avatar %}<img class="profile__photo" src="{{ author.avatar | relative_url }}" alt="{{ author.name }}">{% endif %}
+        <p class="profile__name">{{ author.name }}</p>
+        {% if author.location %}<p class="profile__meta">{{ author.location }}</p>{% endif %}
+        {% if author.email %}<p class="profile__meta">{{ author.email }}</p>{% endif %}
+        <ul class="profile__links">
+          {% if author.googlescholar %}<li><a href="{{ author.googlescholar }}">Google Scholar</a></li>{% endif %}
+          {% if author.researchgate %}<li><a href="{{ author.researchgate }}">ResearchGate</a></li>{% endif %}
+          {% if author.orcid %}<li><a href="{{ author.orcid }}">ORCID</a></li>{% endif %}
+          {% if author.dblp %}<li><a href="{{ author.dblp }}">DBLP</a></li>{% endif %}
+          {% if author.github %}<li><a href="https://github.com/{{ author.github }}">GitHub</a></li>{% endif %}
+          {% if author.linkedin %}<li><a href="https://www.linkedin.com/in/{{ author.linkedin }}">LinkedIn</a></li>{% endif %}
+          {% if author.twitter %}<li><a href="https://twitter.com/{{ author.twitter }}">Twitter</a></li>{% endif %}
+        </ul>
+        <a class="essay" href="{{ '/adaptive-reasoning-agency/' | relative_url }}">
+          <span class="essay__label">Research essay</span>
+          <span class="essay__title">Adaptive Reasoning Agency</span>
+          <span class="essay__dek">The extent to which agents should adapt.</span>
+        </a>
+      </aside>
+      {% endif %}
+
+      <main class="article">
+        <article class="prose">
+          {{ content }}
+        </article>
+        <footer class="footer">
+          <p>{{ author.name }}</p>
+        </footer>
+      </main>
+    </div>
+
+    <script src="{{ '/assets/js/site.js' | relative_url }}"></script>
+  </body>
+</html>
