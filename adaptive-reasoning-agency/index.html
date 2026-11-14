@@ -103,8 +103,7 @@
       <section class="section" id="opening">
         <h2 class="section__title">The flight is booked and the return is gone</h2>
         <p>The request above is an ordinary one. The agent searches for available flights from Rome, selects one, completes the purchase, and the evaluation that accompanies most agent benchmarks confirms the task was completed. The failure becomes visible only when the itinerary is inspected after the run, where a booking that should have remained unchanged has been replaced.</p>
-        <p>Two distinct lessons are available from this episode. The first concerns the task and states which booking should have been made. The second concerns the procedure and states that, before changing any booking, the agent should establish which parts of the itinerary must be preserved. The first lesson repairs one run. The second changes how the agent works on later tasks, including tasks that share little surface with this one.</p>
-        <p>Today a developer inspects the failure and adds the check by hand. The research question is whether the agent can learn to make that change itself, which requires deciding what the experience shows, which part of the procedure needs attention, and whether the revision holds on another task.</p>
+        <p>Remembering which flight should have been booked might help correct the immediate mistake, but such a lesson would have limited value for a different itinerary. The more general problem concerns the booking procedure. Before making changes, the agent should establish which reservations are already confirmed and must be preserved. Learning to perform this check could prevent similar failures in subsequent tasks, even when the surrounding circumstances change.</p>        <p>Today a developer inspects the failure and adds the check by hand. The research question is whether the agent can learn to make that change itself, which requires deciding what the experience shows, which part of the procedure needs attention, and whether the revision holds on another task.</p>
       </section>
 
       <!-- ============================ DECISION ============================ -->
@@ -131,8 +130,7 @@
         </div>
 
         <p>The object being learned in the third regime is an adaptation policy. A retained experience earns its place only if it improves later behaviour, which gives a concrete test for every stored lesson: whether it prevented an error, whether it led to a better outcome, and what it cost.</p>
-        <p>The remainder of this essay follows four capacities that this view requires. The agent first needs a representation of what matters in the context and how its elements relate. Given that representation, it must decide whether new evidence justifies a change. A change that helps should survive beyond the single case, and a consolidated procedure should eventually allow the agent to change before it gets something wrong.</p>
-
+<p>Learning when to adapt begins with interpreting experience. An agent must recognise the relevant aspects of a situation and determine whether new evidence calls for a change in behaviour. Useful revisions should then be retained and applied when similar problems arise. Over time, accumulated experience may also support anticipation, allowing potential failures to be recognised before actions produce consequences that are difficult to reverse.</p>
         <ol class="acts">
           <li><a href="#represent"><span class="acts__n">I</span><span class="acts__t">Represent</span><span class="acts__q">What stays the same when the world changes?</span></a></li>
           <li><a href="#revise"><span class="acts__n">II</span><span class="acts__t">Revise</span><span class="acts__q">Which evidence is worth changing my mind for?</span></a></li>
@@ -182,11 +180,10 @@
               <p class="syll__verdict"><span class="chip chip--fail">Invalid deduction</span></p>
             </div>
           </div>
-          <figcaption><b>A plausible conclusion with an invalid argument.</b> The conclusion is true in the world and the deduction is invalid. Removing the content exposes the form, and the form is what the validity judgement depends on. The tendency to let believability override validity is known as content effect, in humans and in LLMs.</figcaption>
+          <figcaption><b>A plausible conclusion with an invalid argument.</b> The conclusion is true in the world and the deduction is invalid. Removing the content exposes the logical form on which the validity judgement depends. The tendency to let believability override validity is known as content effect, in humans and in LLMs.</figcaption>
         </figure>
 
-        <p>Content effect offers a direct test of whether explicit structure changes behaviour. We compare free-form reasoning with deductive prompting, with quasi-symbolic guidance (QuaSAR), and with Boethius, a schema-guided framework that separates the identification of the logical schema from its instantiation on the concrete predicates <span class="cite" data-paper="boethius"></span>.</p>
-
+<p>Content effect provides a useful setting for examining how explicit structure influences reasoning. We investigate different approaches, including free-form generation, deductive prompting and quasi-symbolic guidance through QuaSAR. Boethius extends this direction by separating the identification of a logical schema from its application to the predicates of a particular argument <span class="cite" data-paper="boethius"></span>.</p>
         <figure class="figure figure--wide">
           <div class="chart" id="chart-content"></div>
           <figcaption><b>Making structure explicit reduces content effect.</b> The comparison suggests that reasoning becomes less sensitive to misleading content when logical structures are made explicit. Schema-guided approaches help models distinguish the validity of an argument from the plausibility of its conclusion.</figcaption>
@@ -251,8 +248,7 @@
         <aside class="open">
           <p class="open__label">Open question</p>
           <p class="open__q">Can revision follow the evidence?</p>
-          <p>An explicit policy improves accuracy, and explicit arguments can be challenged. An important question remains: does the model revise its position because the evidence has changed, or simply because another argument was presented?</p>
-        </aside>
+<p>Learning when to challenge a claim can improve accuracy, although successful decisions do not necessarily establish whether the supporting evidence has been evaluated correctly. A model may revise its position because a competing argument is better supported or because the argument is presented more confidently. Distinguishing these behaviours requires examining how decisions respond to changes in the available evidence.</p>        </aside>
 
         <ul class="papers" data-papers="sycophancy,dialectic,clinical"></ul>
       </section>
@@ -285,8 +281,7 @@
 
         <figure class="figure figure--wide">
           <div class="anim" data-anim="eva"></div>
-          <figcaption><b>From a trajectory to memory.</b> The Perceptor turns the recent interaction into a quasi-symbolic abstraction, the Controller decides how to proceed, and the Actor acts on that state. Verified successes and instructive failures are stored, retrieved by structure and reused on later tasks. The Controller is calibrated before interaction and held fixed during it, whilst the Perceptor and the Actor keep learning from realised trajectories.</figcaption>
-        </figure>
+<figcaption><b>Learning from interaction.</b> EVA connects perception, action and control through a shared quasi-symbolic representation. The Perceptor abstracts the ongoing interaction, while the Actor selects actions and the Controller regulates how the agent proceeds. Successful trajectories and informative failures contribute to a procedural memory that can guide later tasks. The Controller is calibrated before interaction, whereas the Perceptor and Actor can be updated from experience between episodes.</figcaption>        </figure>
         <p>A longer technical post, <a href="/evolving-agents/">Evolving Agents</a>, follows EVA and WEVA step by step.</p>
 
         <figure class="figure figure--wide">
@@ -311,8 +306,7 @@
 
         <figure class="figure figure--wide">
           <div class="anim" data-anim="weva"></div>
-          <figcaption><b>Predict, check, then act.</b> The request is the one that opens this essay. Candidate actions are rolled forward by the world model, a predicted transition that breaks an active precondition is pruned, and only a consistent action reaches the environment. The agreement between predicted and observed states gives the model-trust signal that tells the Controller when lookahead is still reliable.</figcaption>
-        </figure>
+<figcaption><b>Anticipating the consequences of an action.</b> WEVA uses a learned world model to examine possible state transitions before interacting with the environment. Candidate actions are evaluated against the constraints represented in the current state, allowing inconsistent transitions to be discarded. After execution, the observed outcome is compared with the prediction, providing feedback on whether the world model remains reliable.</figcaption>        </figure>
 
         <p>The same procedure applies to the shopping task of the previous section.</p>
 
@@ -337,8 +331,7 @@
         </figure>
 
         <h3 class="subhead">The signal changes before task success does</h3>
-        <p>The agreement between predicted and observed states provides a measure of model trust. When the environment changes, this signal can deteriorate before task performance declines, indicating that the agent's current expectations may no longer be reliable.</p>
-
+<p>The agreement between predicted and observed states serves as a proxy for the reliability of the learned world model. When environmental dynamics change, this agreement may deteriorate before any decline in task performance becomes visible. Monitoring prediction reliability could therefore help identify when the current model of the environment needs to be reconsidered.</p>
         <figure class="figure figure--wide">
           <svg class="timeline" viewBox="0 0 720 190" role="img" aria-label="Timeline: environment changes at step 500, trust alert at step 545, task success degrades about 70 steps later">
             <rect class="tl-band" x="246" y="46" width="252" height="76" />
@@ -356,29 +349,23 @@
             <line class="tl-span" x1="254" y1="88" x2="490" y2="88" />
             <text class="tl-lead" x="372" y="80" text-anchor="middle">detection lead of about 70 steps</text>
           </svg>
-          <figcaption><b>An early reason to reconsider.</b> SW-Shift, Qwen3.5-9B. Model trust crosses its alert level about 70 interaction steps before task success crosses its degradation threshold. The size of this lead depends on the thresholds chosen.</figcaption>
-        </figure>
+<figcaption><b>Detecting change before performance degrades.</b> Following an environmental change, model trust may begin to deteriorate before task success declines. The early warning creates an opportunity to reconsider the current strategy, although the timing depends on the thresholds used for detection.</figcaption>        </figure>
 
         <div class="pair">
           <figure class="figure">
             <div class="chart" id="chart-weva-abl"></div>
-            <figcaption><b>Revision and trust gating both contribute.</b> SW-Shift score (%). Removing revision lowers full WEVA from 68.1% to 59.0%, and removing the trust gate lowers it to 64.0%.</figcaption>
-          </figure>
+<figcaption><b>Revision and model trust both contribute.</b> Removing either revision or trust gating weakens performance. Effective anticipation therefore depends on maintaining the predictive model and recognising when simulated outcomes have become unreliable.</figcaption>          </figure>
           <figure class="figure">
             <div class="chart" id="chart-ops"></div>
-            <figcaption><b>The Controller changes its operation.</b> Share of selected operations (%). With high trust the Controller relies on lookahead (79.6%), and with low trust it shifts towards rebuilding the abstraction (37.2%).</figcaption>
-          </figure>
+<figcaption><b>Adapting the use of prediction.</b> With reliable predictions, the Controller favours lookahead to evaluate candidate actions. As model trust declines, rebuilding the current abstraction becomes more frequent, allowing the agent to reassess the environment before proceeding.</figcaption>          </figure>
         </div>
 
-        <p>The structured state is what makes the check possible. A structured predictive state reaches 92.8% against 87.3% for free-text prediction, with a logical error rate of 3.2% against 8.3%, since free text provides no fixed field against which an active precondition can be verified.</p>
-
+<p>Verification depends on how predicted states are represented. Explicit entities, relations and preconditions allow the agent to check whether candidate actions satisfy the constraints of the current environment. Free-text prediction remains flexible, but critical conditions may be left implicit, making consistency more difficult to verify.</p>
         <h3 class="subhead">A first step towards adaptation control</h3>
-        <p>In WEVA the signal is learned from experience, whereas the Controller that uses it is calibrated before interaction and fixed during it. A controlled toy experiment, separate from the EVA and WEVA measurements, makes the next step concrete. After a template change, a previously useful editing procedure becomes unsafe across 300 document tasks, and the controller chooses whether to act directly, retrieve a procedure or rebuild the task representation. Safe completion requires that the requested edit is completed and the protected documents are preserved.</p>
-
+<p>WEVA learns a measure of model trust from experience, while the Controller remains fixed during interaction. A further research question concerns whether experience can also inform the adaptation policy itself. An illustrative experiment with document-editing tasks explores a setting in which a template change makes a previously useful procedure unreliable. The agent must decide whether to continue acting, retrieve an earlier procedure or rebuild the task representation. Successful adaptation requires completing the requested edit while preserving the documents that should remain unchanged.</p>
         <figure class="figure figure--wide">
           <div class="chart" id="chart-control"></div>
-          <figcaption><b>Checked feedback improves the adaptation choice.</b> Safe completion (%) over 300 document tasks. A policy updated from replayed, checked outcomes reaches 97.7% against 66.7% for the frozen policy (293 against 200 safe completions), at a mean execution cost of 2.95 per task against 4.00 for always rebuilding. The learned change is to rebuild the affected template and stop retrieving its old procedure.</figcaption>
-        </figure>
+<figcaption><b>Learning when to adapt.</b> The illustrative experiment examines whether feedback from verified outcomes can improve the choice of adaptation operation. Following a change in the document template, the updated policy favours rebuilding the affected representation and avoids retrieving procedures that are no longer reliable.</figcaption>        </figure>
 
         <p>The extent to which an agent should adapt can now be stated as a choice of operation together with the computation spent on it.</p>
 
@@ -401,21 +388,15 @@
       <!-- ============================ COLLECTIVE ============================ -->
       <section class="section" id="collective">
         <h2 class="section__title">What changes when procedures become shared?</h2>
-        <p>Individual memory captures what an agent has learned from its own experience. Team memory introduces a different problem: deciding which procedures can be safely shared and reused by other agents. With multiple contributors, shared knowledge requires evidence, provenance and mechanisms for resolving conflicts, updating outdated information and maintaining consistency.</p>
-
+<p>Scaling procedural memory from individual agents to multi-agent systems introduces challenges that go beyond storing successful interactions. A procedure learned in one context may be useful to other agents, although sharing knowledge also requires establishing where the procedure originated, which evidence supports it and whether the conditions for reuse still hold. Maintaining a reliable collective memory therefore involves managing conflicting experiences and updating procedures as the environment changes.</p>
         <figure class="figure figure--wide">
           <div class="chart" id="chart-transfer"></div>
-          <figcaption><b>A procedure induced by one agent is usable by another.</b> Success rate (%) for Qwen-2.5 without memory, with a memory of typed abstractions induced by Llama-3 and reused without tuning, and with the memory it induced itself. The transferred memory recovers most of the distance to the self-induced one, including on ScienceWorld-Shift (28.6%→56.4%, against 60.9%).</figcaption>
-        </figure>
+<figcaption><b>Procedural memory can transfer across models.</b> Procedures learned with one model can remain useful when transferred to another without additional tuning. The comparison suggests that aspects of agent experience can be represented independently of the model that originally acquired them, opening the possibility of reusing procedural knowledge across different systems.</figcaption>        </figure>
 
-        <p>What transfers between the two backbones is the procedure, independently of the weights and of the wording. The benefit is largest where the work divides. EVA-M adds a planner and specialised executors that coordinate through one shared procedural memory, and on AppWorld it raises task goal completion from 51.2% to 57.8% and scenario goal completion from 36.8% to 43.5% with Qwen-2.5-7B <span class="cite" data-paper="eva"></span>.</p>
-
-        <h3 class="subhead">Reuse creates similarity</h3>
-        <p>Sharing a validated procedure avoids duplicated work and repeated failures. It also makes agents more alike. Agents are low-variance decision makers, and given the same context they take the same action, which turns an isolated poor decision into a correlated one. The relevant question is how much of a shared procedure should remain local, and that quantity is measurable.</p>
-
+<p>The transfer of procedural knowledge becomes particularly relevant when several agents contribute to the same task. EVA-M explores this setting through a planner that can orchestrate specialised executors using a common procedural memory. Previous interactions provide reusable procedures that may guide decisions across the team, allowing agents to benefit from experience acquired beyond their own interactions <span class="cite" data-paper="eva"></span>.</p>        <h3 class="subhead">Reuse creates similarity</h3>
+<p>Sharing validated procedures can reduce duplicated effort and prevent agents from repeating failures encountered by other members of the team. Shared memory, however, may also propagate incorrect assumptions. An outdated procedure adopted by several agents can lead to similar errors across otherwise different tasks. Reliable coordination therefore requires mechanisms for questioning, revising and occasionally rejecting shared procedures without discarding useful individual experience.</p>
         <h3 class="subhead">Evaluation has to look at the environment</h3>
-        <p>The opening example shows a broader challenge studied in WorldBench, which evaluates language agents on culturally grounded, multilingual workflows in realistic file-based environments. The benchmark examines both task completion and preservation of the surrounding workspace <span class="cite" data-paper="worldbench"></span>.</p>
-
+<p>The opening example illustrates a broader challenge in evaluating language agents. Completing the requested task does not guarantee that the surrounding environment has been preserved. WorldBench examines this problem through culturally grounded, multilingual workflows in realistic file-based environments. Evaluating agent behaviour at scale requires checking the state of the workspace after execution, including files and records that were never meant to change <span class="cite" data-paper="worldbench"></span>.</p>
         <figure class="figure figure--wide">
           <div class="chart" id="chart-worldbench"></div>
 <figcaption><b>Task success does not guarantee workspace preservation.</b> WorldBench evaluates whether agents complete their tasks while leaving unrelated files unchanged. The gap between task completion and constrained task success reveals failures that ordinary task-level evaluation may overlook.</figcaption>        </figure>
@@ -423,8 +404,7 @@
         <aside class="open">
           <p class="open__label">Open question</p>
           <p class="open__q">Can adaptation become collective and accountable?</p>
-          <p>Three primitives are candidates, namely provenance (who wrote a procedure, and from what), dissent (a procedure for pressing private evidence) and cost (a price on an unfounded claim). Our contribution is an attribution, in which each primitive is tested against the specific failure it repairs.</p>
-        </aside>
+<p>Reliable collective memory requires more than storing and sharing successful procedures. The origin of a procedure must remain traceable, while conflicting experiences need to be examined before becoming part of shared knowledge. Agents should also be able to challenge unsupported updates and account for the consequences of unreliable recommendations. A central research question is whether these mechanisms can prevent errors from spreading across a team without limiting useful individual learning.</p>        </aside>
 
         <ul class="papers" data-papers="eva,dialectic,worldbench"></ul>
       </section>
@@ -432,8 +412,7 @@
       <!-- ============================ AHEAD ============================ -->
       <section class="section" id="ahead">
         <h2 class="section__title">Which experience should change the next decision?</h2>
-        <p>This research treats adaptation as a reasoning problem. Structure tells the system what should remain invariant. Evidence tells it when to revise. Memory determines what persists, and prediction determines how far to act. Each capacity leaves one question that the existing results make testable.</p>
-
+<p>Across these studies, a common problem emerges around the ability of language agents to recognise when past experience remains useful. Structured reasoning provides a way to identify relationships that persist across contexts, while feedback can reveal when earlier assumptions no longer hold. Procedural memory allows successful strategies to be reused, and world models provide a means of examining possible consequences before taking action. The remaining challenge is to understand how these capabilities can inform the adaptation policy itself, allowing agents to learn when to rely on previous experience and when established procedures need to be reconsidered.</p>
         <dl class="questions">
           <div><dt>Represent</dt><dd>Does explicit structure track what the model uses internally?</dd></div>
           <div><dt>Revise</dt><dd>Does better evidence lead to a better revision decision?</dd></div>
