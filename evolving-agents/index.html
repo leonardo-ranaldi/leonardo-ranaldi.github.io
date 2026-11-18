@@ -62,8 +62,8 @@
         <p class="hero__by">Leonardo Ranaldi, University of Edinburgh and University of Rome Tor Vergata. A technical post on EVA (ACL 2026) and WEVA (EMNLP 2026).</p>
 
         <figure class="figure figure--hero">
-          <div class="anim" data-anim="both"></div>
-          <figcaption><b>Figure 1. EVA and WEVA share one representation.</b> EVA turns a trajectory into a quasi-symbolic abstraction, stores it after a verified success or an instructive failure, and retrieves it on later tasks. WEVA uses the same state to predict what a candidate action would cause, and prunes an action whose predicted consequence breaks a precondition before it reaches the environment.</figcaption>
+          <div class="anim" data-anim="eva"></div>
+          <figcaption><b>Figure 1. EVA turns experience into memory.</b> The agent acts on a task, the Perceptor maps the trajectory into a quasi-symbolic abstraction, and the abstraction is stored after a verified success or an instructive failure. On later tasks the Controller retrieves it and the Actor adapts it to the new entities.</figcaption>
         </figure>
 
         <p class="hero__lead">Language agents increasingly solve streams of related tasks in the same environment. A shopping agent searches the same catalogue, an assistant edits the same set of files, a travel agent books through the same sites. Each task leaves experience that could make the next one easier. In practice, agents keep little of it, and they repeat similar mistakes across tasks that share the same structure.</p>
@@ -108,7 +108,7 @@
       <!-- ============================ EVA ============================ -->
       <section class="section" id="eva">
         <h2 class="section__title">EVA: turning experience into procedures</h2>
-        <p>EVA organises the agent around three modules, the Perceptor, the Controller and the Actor. The three modules read and write the same quasi-symbolic abstraction, which also serves as the interface to memory <span class="cite" data-paper="eva"></span>. The first tab of Figure 1 follows one complete cycle.</p>
+        <p>EVA organises the agent around three modules, the Perceptor, the Controller and the Actor. The three modules read and write the same quasi-symbolic abstraction, which also serves as the interface to memory <span class="cite" data-paper="eva"></span>. Figure 1 follows one complete cycle.</p>
 
         <h3 class="subhead">The Perceptor reads the trajectory</h3>
         <p>Given the goal, the current observation and a recent window of actions and feedback, the Perceptor writes the active abstraction. It also reports how confident it is in what it has written, a signal that the Controller reads at the next step.</p>
@@ -134,7 +134,12 @@
       <!-- ============================ WEVA ============================ -->
       <section class="section" id="weva">
         <h2 class="section__title">WEVA: from remembering to predicting</h2>
-        <p>EVA improves which action the agent proposes. The consequence of that action, however, is observed only after execution. Over long horizons this becomes critical, since an error may surface only when the state in which it could have been prevented is no longer reachable. WEVA adds a world model, and the agent evaluates candidate actions against it before acting <span class="cite" data-paper="weva"></span>. The second tab of Figure 1 follows the procedure on the flight request.</p>
+        <p>EVA improves which action the agent proposes. The consequence of that action, however, is observed only after execution. Over long horizons this becomes critical, since an error may surface only when the state in which it could have been prevented is no longer reachable. WEVA adds a world model, and the agent evaluates candidate actions against it before acting <span class="cite" data-paper="weva"></span>. Figure 3 follows the procedure on the flight request.</p>
+
+        <figure class="figure figure--wide">
+          <div class="anim" data-anim="weva"></div>
+          <figcaption><b>Figure 3. WEVA predicts, checks, then acts.</b> Candidate actions are rolled forward by the world model, and a branch whose predicted consequence breaks an active precondition is pruned before it reaches the environment. When predictions stop matching observations, model trust falls and the Controller rebuilds the abstraction.</figcaption>
+        </figure>
 
         <h3 class="subhead">A state that can be predicted</h3>
         <p>WEVA keeps the entities, preconditions and outcomes of the abstraction as its predictive state. A transition model learns to map a state and a candidate action to the state expected to follow. No annotation is required, since after every executed action the next observation shows what actually happened. The Perceptor is also rewarded when its states are easier to predict, which encourages it to keep the information that governs how the environment changes.</p>
@@ -159,7 +164,7 @@
 
         <figure class="figure figure--wide">
           <div class="chart" id="chart-form"></div>
-          <figcaption><b>Figure 3. The representation matters.</b> ALFWorld success when one component is removed or the memory format is replaced.</figcaption>
+          <figcaption><b>Figure 4. The representation matters.</b> ALFWorld success when one component is removed or the memory format is replaced.</figcaption>
         </figure>
 
         <p><b>Failures are worth remembering.</b> A configuration that stores only verified successes stays close to the full model on static benchmarks and falls behind when the environment changes. Constraints derived from localised failures are what the agent reuses to recover.</p>
@@ -169,7 +174,7 @@
 
         <figure class="figure figure--wide">
           <div class="chart" id="chart-weva"></div>
-          <figcaption><b>Figure 4. WEVA against EVA.</b> Task outcome across four environments, with the same backbone and interaction budget.</figcaption>
+          <figcaption><b>Figure 5. WEVA against EVA.</b> Task outcome across four environments, with the same backbone and interaction budget.</figcaption>
         </figure>
 
         <h3 class="subhead" id="q3">The agent can notice that the world has changed</h3>
