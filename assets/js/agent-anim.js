@@ -300,7 +300,7 @@
       dotEls.forEach(function (d, k) { d.classList.toggle("on", k === idx); });
     }
     function tick() { show(idx + 1); schedule(); }
-    function schedule() { clearTimeout(timer); if (playing && visible) timer = setTimeout(tick, idx === sc.frames.length - 1 ? 3600 : 2300); }
+    function schedule() { clearTimeout(timer); if (playing && visible) timer = setTimeout(tick, idx === sc.frames.length - 1 ? 3600 : 1900); }
     function start() { playing = true; play.textContent = "Pause"; schedule(); }
     function stop() { playing = false; play.textContent = "Play"; clearTimeout(timer); }
     prev.addEventListener("click", function () { stop(); show(idx - 1); });
