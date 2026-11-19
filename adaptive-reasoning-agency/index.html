@@ -129,7 +129,7 @@
           </div>
         </div>
 
-        <p>The object being learned in the third regime is an adaptation policy. A retained experience earns its place only if it improves later behaviour, which gives a concrete test for every stored lesson: whether it prevented an error, whether it led to a better outcome, and what it cost.</p>
+        <p>In the third regime, what gets learned is an adaptation policy. A stored lesson earns its keep only if it improves future runs, giving us a concrete yardstick: did the lesson prevent an error, did the final outcome improve, and was the extra computation worth the cost?</p>
 <p>Learning when to adapt begins with interpreting experience. An agent must recognise the relevant aspects of a situation and determine whether new evidence calls for a change in behaviour. Useful revisions should then be retained and applied when similar problems arise. Over time, accumulated experience may also support anticipation, allowing potential failures to be recognised before actions produce consequences that are difficult to reverse.</p>
         <ol class="acts">
           <li><a href="#represent"><span class="acts__n">I</span><span class="acts__t">Represent</span><span class="acts__q">What stays the same when the world changes?</span></a></li>
@@ -190,7 +190,7 @@
         </figure>
 
         <h3 class="subhead">From the prompt to the activations</h3>
-        <p>The distinction between content and structure also matters inside the model. An Abstractor aims to bring internal representations closer to the underlying reasoning pattern, reducing their dependence on the particular words used in a problem. This provides a way to study whether abstract reasoning can be recovered from ordinary inputs and carried across languages <span class="cite" data-paper="aas"></span>.</p>
+        <p>The split between content and structure also plays out inside the model. An Abstractor steers internal representations toward the underlying reasoning pattern, loosening the grip of the specific words used in a prompt. Such steering lets us test whether abstract reasoning can be recovered from ordinary text and carried across languages <span class="cite" data-paper="aas"></span>.</p>
 
         <figure class="figure figure--wide">
           <div class="chart" id="chart-abstractor"></div>
@@ -210,7 +210,7 @@
       <section class="section section--act" id="revise">
         <p class="act-mark"><span>II</span> Revise</p>
         <h2 class="section__title">Which evidence should change behaviour?</h2>
-        <p>An agent can fail in two opposite directions. It can yield to a confident source that is wrong, and it can resist a correction that is right. A single threshold cannot resolve both failures, since tightening it against one makes the other more frequent. Helpful adaptation therefore includes the ability to challenge a claim.</p>
+        <p>An agent can fail in two opposite ways: yielding to a confident user who is wrong, or stonewalling a correction that is right. No single threshold can fix both errors, because guarding against gullibility inevitably breeds stubbornness. Genuine adaptation therefore requires knowing when to push back.</p>
 
         <figure class="figure">
           <div class="dialogue" id="dialogue">
@@ -257,7 +257,7 @@
       <section class="section section--act" id="consolidate">
         <p class="act-mark"><span>III</span> Consolidate</p>
         <h2 class="section__title">How does an agent learn from experience?</h2>
-        <p>Storing an interaction retains what happened. It does not guarantee that the next decision improves. The difficulty of memory lies in retaining something that remains useful when the situation changes, which again depends on the form in which experience is kept.</p>
+        <p>Logging a past interaction records what happened, yet raw logs rarely improve the next decision. The real challenge of memory is preserving lessons that stay useful when circumstances shift—a property that hinges on how experience is represented in the first place.</p>
         <p>Consider a request from WebShop: “Find me a pair of black-and-blue sneakers that are good in rain weather, have puffy soles, and cost less than $90.” Each requirement needs evidence from the candidate product. A quasi-symbolic memory keeps the relations in explicit fields and lets language supply the current case.</p>
 
         <figure class="figure">
@@ -362,10 +362,9 @@
 
 <p>Verification depends on how predicted states are represented. Explicit entities, relations and preconditions allow the agent to check whether candidate actions satisfy the constraints of the current environment. Free-text prediction remains flexible, but critical conditions may be left implicit, making consistency more difficult to verify.</p>
         <h3 class="subhead">A first step towards adaptation control</h3>
-<p>WEVA learns a measure of model trust from experience, while the Controller remains fixed during interaction. A further research question concerns whether experience can also inform the adaptation policy itself. An illustrative experiment with document-editing tasks explores a setting in which a template change makes a previously useful procedure unreliable. The agent must decide whether to continue acting, retrieve an earlier procedure or rebuild the task representation. Successful adaptation requires completing the requested edit while preserving the documents that should remain unchanged.</p>
-        <figure class="figure figure--wide">
+<p>WEVA learns a measure of model trust from experience, while the Controller remains fixed during interaction. A further research question concerns whether experience can also inform the adaptation policy itself. **An experiment** with document-editing tasks explores a setting in which a template change makes a previously useful procedure unreliable. The agent must decide whether to continue acting, retrieve an earlier procedure or rebuild the task representation. Successful adaptation requires completing the requested edit while preserving the documents that should remain unchanged.</p>        <figure class="figure figure--wide">
           <div class="chart" id="chart-control"></div>
-<figcaption><b>Learning when to adapt.</b> The illustrative experiment examines whether feedback from verified outcomes can improve the choice of adaptation operation. Following a change in the document template, the updated policy favours rebuilding the affected representation and avoids retrieving procedures that are no longer reliable.</figcaption>        </figure>
+<figcaption><b>Learning when to adapt.</b> The experiment examines whether feedback from verified outcomes can improve the choice of adaptation operation. Following a change in the document template, the updated policy favours rebuilding the affected representation and avoids retrieving procedures that are no longer reliable.</figcaption>        </figure>
 
         <p>The extent to which an agent should adapt can now be stated as a choice of operation together with the computation spent on it.</p>
 
@@ -388,7 +387,7 @@
       <!-- ============================ COLLECTIVE ============================ -->
       <section class="section" id="collective">
         <h2 class="section__title">What changes when procedures become shared?</h2>
-<p>Scaling procedural memory from individual agents to multi-agent systems introduces challenges that go beyond storing successful interactions. A procedure learned in one context may be useful to other agents, although sharing knowledge also requires establishing where the procedure originated, which evidence supports it and whether the conditions for reuse still hold. Maintaining a reliable collective memory therefore involves managing conflicting experiences and updating procedures as the environment changes.</p>
+<p>Scaling procedural memory from individual agents to multi-agent systems introduces challenges that go beyond storing successful interactions. A procedure learned in one context may be useful to other agents, but sharing knowledge also requires establishing where the procedure originated, what evidence supports it, and whether the conditions for reuse still hold. Maintaining a reliable collective memory therefore involves managing conflicting experiences and updating procedures as the environment changes.</p>
         <figure class="figure figure--wide">
           <div class="chart" id="chart-transfer"></div>
 <figcaption><b>Procedural memory can transfer across models.</b> Procedures learned with one model can remain useful when transferred to another without additional tuning. The comparison suggests that aspects of agent experience can be represented independently of the model that originally acquired them, opening the possibility of reusing procedural knowledge across different systems.</figcaption>        </figure>
@@ -396,7 +395,7 @@
 <p>The transfer of procedural knowledge becomes particularly relevant when several agents contribute to the same task. EVA-M explores this setting through a planner that can orchestrate specialised executors using a common procedural memory. Previous interactions provide reusable procedures that may guide decisions across the team, allowing agents to benefit from experience acquired beyond their own interactions <span class="cite" data-paper="eva"></span>.</p>        <h3 class="subhead">Reuse creates similarity</h3>
 <p>Sharing validated procedures can reduce duplicated effort and prevent agents from repeating failures encountered by other members of the team. Shared memory, however, may also propagate incorrect assumptions. An outdated procedure adopted by several agents can lead to similar errors across otherwise different tasks. Reliable coordination therefore requires mechanisms for questioning, revising and occasionally rejecting shared procedures without discarding useful individual experience.</p>
         <h3 class="subhead">Evaluation has to look at the environment</h3>
-<p>The opening example illustrates a broader challenge in evaluating language agents. Completing the requested task does not guarantee that the surrounding environment has been preserved. WorldBench examines this problem through culturally grounded, multilingual workflows in realistic file-based environments. Evaluating agent behaviour at scale requires checking the state of the workspace after execution, including files and records that were never meant to change <span class="cite" data-paper="worldbench"></span>.</p>
+<p>The opening example shows a broader challenge in evaluating language agents. Completing the requested task does not guarantee that the surrounding environment has been preserved. WorldBench examines this problem through culturally grounded, multilingual workflows in realistic file-based environments. Evaluating agent behaviour at scale requires checking the state of the workspace after execution, including files and records that were never meant to change <span class="cite" data-paper="worldbench"></span>.</p>
         <figure class="figure figure--wide">
           <div class="chart" id="chart-worldbench"></div>
 <figcaption><b>Task success does not guarantee workspace preservation.</b> WorldBench evaluates whether agents complete their tasks while leaving unrelated files unchanged. The gap between task completion and constrained task success reveals failures that ordinary task-level evaluation may overlook.</figcaption>        </figure>
@@ -404,7 +403,7 @@
         <aside class="open">
           <p class="open__label">Open question</p>
           <p class="open__q">Can adaptation become collective and accountable?</p>
-<p>Reliable collective memory requires more than storing and sharing successful procedures. The origin of a procedure must remain traceable, while conflicting experiences need to be examined before becoming part of shared knowledge. Agents should also be able to challenge unsupported updates and account for the consequences of unreliable recommendations. A central research question is whether these mechanisms can prevent errors from spreading across a team without limiting useful individual learning.</p>        </aside>
+<p>Reliable collective memory requires more than storing and sharing successful procedures. The origin of a procedure must remain traceable, and conflicting experiences must be examined before becoming part of shared knowledge. Agents should also be able to challenge unsupported updates and account for the consequences of unreliable recommendations. A central research question is whether these mechanisms can prevent errors from spreading across a team without limiting useful individual learning.</p>        </aside>
 
         <ul class="papers" data-papers="eva,dialectic,worldbench"></ul>
       </section>
@@ -412,7 +411,7 @@
       <!-- ============================ AHEAD ============================ -->
       <section class="section" id="ahead">
         <h2 class="section__title">Which experience should change the next decision?</h2>
-<p>Across these studies, a common problem emerges around the ability of language agents to recognise when past experience remains useful. Structured reasoning provides a way to identify relationships that persist across contexts, while feedback can reveal when earlier assumptions no longer hold. Procedural memory allows successful strategies to be reused, and world models provide a means of examining possible consequences before taking action. The remaining challenge is to understand how these capabilities can inform the adaptation policy itself, allowing agents to learn when to rely on previous experience and when established procedures need to be reconsidered.</p>
+<p>Every thread in this work converges on a single question: how can a language agent tell when past experience still applies? Structured reasoning provides a way to identify relationships that persist across contexts, while feedback can reveal when earlier assumptions no longer hold. Procedural memory allows successful strategies to be reused, and world models provide a means of examining possible consequences before taking action. The remaining challenge is to understand how these capabilities can inform the adaptation policy itself, allowing agents to learn when to rely on previous experience and when established procedures need to be reconsidered.</p>
         <dl class="questions">
           <div><dt>Represent</dt><dd>Does explicit structure track what the model uses internally?</dd></div>
           <div><dt>Revise</dt><dd>Does better evidence lead to a better revision decision?</dd></div>
@@ -425,7 +424,7 @@
           <p>“Custom, then, is the great guide of human life.”</p>
           <footer>David Hume, <cite>An Enquiry Concerning Human Understanding</cite>, Section V</footer>
         </blockquote>
-        <p>Experience shapes expectations. The aim of this research is to develop agents that can decide when to change their behaviour, what evidence supports the revision, and whether the change improves future decisions.</p>
+        <p>Experience shapes expectations. This research aims to develop agents that can decide when to change their behaviour, what evidence supports the revision, and whether the change improves future decisions.</p>
       </section>
 
       <!-- ============================ PAPERS ============================ -->
@@ -436,7 +435,7 @@
       </section>
 
       <footer class="footer">
-        <p>Leonardo Ranaldi. With thanks to my collaborators, mentors and students.</p>
+        <p>Leonardo Ranaldi. With thanks to my mentors,  collaborators and students.</p>
         <p><a href="/blog/">All posts</a> and <a href="/">homepage</a></p>
       </footer>
     </main>
